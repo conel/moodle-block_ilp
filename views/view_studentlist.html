@@ -1,12 +1,20 @@
 <?php
 
 // include standard libraries
+/*
 $PAGE->requires->yui2_lib("yahoo");
 $PAGE->requires->yui2_lib("event");
 $PAGE->requires->yui2_lib("dom");
 $PAGE->requires->yui2_lib("animation");
 $PAGE->requires->yui2_lib("container");
 $PAGE->requires->yui2_lib("connection");
+*/
+
+$PAGE->requires->js('/lib/yui/2.9.0/build/yahoo/yahoo-min.js');
+$PAGE->requires->js('/lib/yui/2.9.0/build/event/event-min.js');
+$PAGE->requires->js('/lib/yui/2.9.0/build/dom/dom-min.js');
+$PAGE->requires->js('/lib/yui/2.9.0/build/animation/animation-min.js');
+$PAGE->requires->js('/lib/yui/2.9.0/build/container/container.js');
 
 // load the standard YUI style sheet
 $PAGE->requires->css_theme(new moodle_url($CFG->wwwroot.'/lib/yui/container/assets/container.css'));
