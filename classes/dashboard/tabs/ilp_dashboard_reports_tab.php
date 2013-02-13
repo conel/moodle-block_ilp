@@ -204,6 +204,68 @@ class ilp_dashboard_reports_tab extends ilp_dashboard_tab {
 							$icon				=	(!empty($report->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$report->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
 
 							echo $this->get_header($report->name,$icon);
+							
+							//RPM 2013-02-11 need to add in the edit / add buttons if the user has permission
+							//code taken from ilp_dashboard_entries_tab.php to determine permissions and then show the button
+							
+							$role_ids	=	ilp_get_user_role_ids($PAGE->context,$USER->id);
+							$authuserrole	=	$this->dbc->get_role_by_name(ILP_AUTH_USER_ROLE);
+							if (!empty($authuserrole)) $role_ids[]	=	$authuserrole->id;
+							
+							$addcapability		=	$this->dbc->get_capability_by_name('block/ilp:addreport');
+							$editcapability		=	$this->dbc->get_capability_by_name('block/ilp:editreport');
+							$viewcapability		=	$this->dbc->get_capability_by_name('block/ilp:viewreport');
+							$caneditreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$editcapability->id);
+							$canaddreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$addcapability->id);
+							$canviewreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$viewcapability->id);							
+
+							if (!empty($caneditreport) || !empty($canaddreport) || !empty($canviewreport)) {
+
+								$detail					=	new stdClass();
+								$detail->report_id		=	$report->id;
+								//does this report have a state field
+
+								//get all entries for this student in report
+                                $detail->entries		=	($this->dbc->count_report_entries($report->id,$this->student_id)) ? $this->dbc->count_report_entries($report->id,$this->student_id) : 0;
+                                $detail->state_report	=	false;
+
+								//get the last updated report entry
+                                $lastentry				=	$this->dbc->get_lastupdatedentry($report->id,$this->student_id);
+                                $lastupdate				=	$this->dbc->get_lastupdatetime($report->id,$this->student_id);
+
+								$detail->frequency		=	$report->frequency;
+
+								//if the report does not allow mutiple entries (frequency is empty)
+								//then we need to find a report entry instance this will be editable
+								$detail->editentry	=	(empty($detail->frequency) && !empty($lastentry)) ?  $lastentry->id : false;
+								$detail->lastmod	=	(!empty($lastupdate->timemodified)) ?  userdate($lastupdate->timemodified , get_string('strftimedate', 'langconfig')) : get_string('notapplicable','block_ilp');
+								$detail->canadd	    = ($canaddreport) ? true : false;
+								$detail->canedit	= ($caneditreport) ? true : false;
+
+							}
+							
+							//RPM - code below taken straight from ilp_dashboard_entries_tab.html
+							//Will still show edit correctly vs add depending on the report in question
+							
+							?>
+							<div id="right-entries">
+							<div class='add'>
+								<?php 
+									//edit entry will empty except when the report does not allow multiple entries and a entry already exits
+				  
+									if (empty($detail->editentry) && !empty($detail->canadd)) { ?>
+									<a href='<?php echo $CFG->wwwroot."/blocks/ilp/actions/edit_reportentry.php?user_id={$this->student_id}&report_id={$report->id}&course_id={$this->course_id}"; ?>' ><?php echo get_string('addnew','block_ilp'); ?></a>
+									
+								<?php }  else if (!empty($detail->canedit)) { ?>
+									<a href='<?php echo $CFG->wwwroot."/blocks/ilp/actions/edit_reportentry.php?user_id={$this->student_id}&report_id={$report->id}&course_id={$this->course_id}&entry_id={$report->editentry}"; ?>' ><?php echo get_string('edit'); ?></a>			
+									
+								<?php } ?>
+							</div>
+							</div>
+							<?php			
+														
+							//RPM end
+							
 
 							$stateselector	=	(isset($report_id)) ?	$this->stateselector($report_id) :	"";
 

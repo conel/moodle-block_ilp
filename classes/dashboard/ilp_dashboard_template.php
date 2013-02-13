@@ -146,7 +146,7 @@ abstract class ilp_dashboard_template extends ilp_plugin {
 			        if(!class_exists($classname)) {
 			            print_error('pluginclassnotfound', 'block_ilp', '', $classname);
 			        }
-	    			
+					
 	    			//instantiate dashboard_plugin class
 	    			$dashplugin		=	new $classname($student_id,$course_id);	
 	    			

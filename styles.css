@@ -83,6 +83,15 @@
 	padding:0 10px;
 	border-left: 1px solid #ccc;
 }
+
+.ilp #custom-studentinfo { 
+	width:100%;
+	display:block;
+	padding:0 10px;
+	border-left: 1px solid #ccc;
+	border:1px solid red !important;
+}
+
 .ilp #studentinfo-container p{ 
 	padding: 0; 
 	margin: 3px 0;

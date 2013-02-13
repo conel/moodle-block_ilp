@@ -225,6 +225,10 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			//get all enabled reports in this ilp
 			$reports		=	$this->dbc->get_reports(ILP_ENABLED);
 			
+			//RPM 2013-02-11 set our content to have default values, if we have content these will be overwritten.
+			$ilptargets = "No Targets to show";
+			$ilptutorreview = "No Tutor reviews added";
+			//RPM end
 			
 			//we are going to output the add any reports that have state fields to the percentagebar array 
 			if (!empty($reports) ) {
@@ -249,6 +253,274 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 		    	        }
 						
 					}
+					
+					//RPM 2013-02-11 build up additional content to show on the student info page
+					//This is the list of targets in descending order and the latest tutor review entry
+					
+					if ($r->name == "Tutor Review") {
+					
+						//RPM - copy and paste from ilp_dashboard_reports_tab.php
+						
+						$reportentries	=	$this->dbc->get_user_report_entries($r->id,$this->student_id);
+						$reportfields		=	$this->dbc->get_report_fields_by_position($r->id);
+						//start buffering output
+						ob_start();
+						
+						$icon =	(!empty($r->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$r->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
+					
+						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
+						
+						echo "<h2>{$icon}Latest Tutor Review</h2>";
+						
+						//create the entries list var that will hold the entry information
+						$entrieslist	=	array();
+
+						if (!empty($reportentries)) {
+							
+							// RPM - This method used to loop through using foreach but we are only interested in the first entry
+							
+							$entry = array_shift($reportentries);
+							
+
+							//TODO: is there a better way of doing this?
+							//I am currently looping through each of the fields in the report and get the data for it
+							//by using the plugin class. I do this for two reasons it may lock the database for less time then
+							//making a large sql query and 2 it will also allow for plugins which return multiple values. However
+							//I am not naive enough to think there is not a better way!
+
+							$entry_data	=	new stdClass();
+
+							//get the creator of the entry
+							$creator				=	$this->dbc->get_user_by_id($entry->creator_id);
+
+							//get comments for this entry
+							$comments				=	$this->dbc->get_entry_comments($entry->id);
+
+							//
+							$entry_data->creator		=	(!empty($creator)) ? fullname($creator)	: get_string('notfound','block_ilp');
+							$entry_data->created		=	userdate($entry->timecreated);
+							$entry_data->modified		=	userdate($entry->timemodified);
+							$entry_data->user_id		=	$entry->user_id;
+							$entry_data->entry_id		=	$entry->id;
+
+							
+							//does this report allow users to say it is related to a particular course
+							$has_courserelated	=	(!$this->dbc->has_plugin_field($r->id,'ilp_element_plugin_course')) ? false : true;
+
+							if (!empty($has_courserelated))	{
+								$courserelated	=	$this->dbc->has_plugin_field($r->id,'ilp_element_plugin_course');
+								//the should not be anymore than one of these fields in a report
+								foreach ($courserelated as $cr) {
+										$dontdisplay[] 	=	$cr->id;
+										$courserelatedfield_id	=	$cr->id;
+								}
+							}
+
+							if ($has_courserelated) {
+								$coursename	=	false;
+								$crfield	=	$this->dbc->get_report_coursefield($entry->id,$courserelatedfield_id);
+								if (empty($crfield) || empty($crfield->value)) {
+									$coursename	=	get_string('allcourses','block_ilp');
+								} else if ($crfield->value == '-1') {
+									$coursename	=	get_string('personal','block_ilp');
+								} else {
+									$crc	=	$this->dbc->get_course_by_id($crfield->value);
+									if (!empty($crc)) $coursename	=	$crc->shortname;
+								}
+								$entry_data->coursename = (!empty($coursename)) ? $coursename : '';
+							}
+
+							foreach ($reportfields as $field) {
+
+								//get the plugin record that for the plugin
+								$pluginrecord	=	$this->dbc->get_plugin_by_id($field->plugin_id);
+
+								//take the name field from the plugin as it will be used to call the instantiate the plugin class
+								$classname = $pluginrecord->name;
+
+								// include the class for the plugin
+								include_once("{$CFG->dirroot}/blocks/ilp/classes/form_elements/plugins/{$classname}.php");
+
+								if(!class_exists($classname)) {
+									print_error('noclassforplugin', 'block_ilp', '', $pluginrecord->name);
+								}
+
+								//instantiate the plugin class
+								$pluginclass	=	new $classname();
+
+								if ($pluginclass->is_viewable() != false)	{
+									$pluginclass->load($field->id);
+
+									//call the plugin class entry data method
+									$pluginclass->view_data($field->id,$entry->id,$entry_data);
+								} else	{
+									$dontdisplay[]	=	$field->id;
+								}
+
+							}
+
+							include($CFG->dirroot.'/blocks/ilp/classes/dashboard/tabs/ilp_dashboard_reports_tab.html');
+
+						} else {
+
+							echo get_string('nothingtodisplay');
+
+						}
+
+						// load custom javascript
+						$module = array(
+							'name'      => 'ilp_dashboard_reports_tab',
+							'fullpath'  => '/blocks/ilp/classes/dashboard/tabs/ilp_dashboard_reports_tab.js',
+							'requires'  => array('yui2-dom', 'yui2-event', 'yui2-connection', 'yui2-container', 'yui2-animation')
+						);
+
+						// js arguments
+						$jsarguments = array(
+							'open_image'   => $CFG->wwwroot."/blocks/ilp/pix/icons/switch_minus.gif",
+							'closed_image' => $CFG->wwwroot."/blocks/ilp/pix/icons/switch_plus.gif",
+						);
+
+						// initialise the js for the page
+						$PAGE->requires->js_init_call('M.ilp_dashboard_reports_tab.init', $jsarguments, true, $module);
+
+
+						$ilptutorreview = ob_get_contents();
+						ob_end_clean();
+					}
+					
+					
+					if ($r->name == "Targets") {
+						
+						//RPM - another copy and paste from ilp_dashboard_reports_tab.php
+						
+						$reportentries	=	$this->dbc->get_user_report_entries($r->id,$this->student_id);
+						$reportfields = $this->dbc->get_report_fields_by_position($r->id);
+						
+						$access_report_editreports	= false;
+						
+						//start buffering output
+						ob_start();
+						
+						$icon =	(!empty($r->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$r->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
+					
+						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
+
+						echo "<h2>{$icon}{$r->name}</h2>";
+						
+						//create the entries list var that will hold the entry information
+						$entrieslist	=	array();
+
+						if (!empty($reportentries)) {
+							foreach ($reportentries as $entry)	{
+							// RPM - need to change to only show the first record : $entry = $reportentries[0]; doesnt work, think it is a datarow
+
+								//TODO: is there a better way of doing this?
+								//I am currently looping through each of the fields in the report and get the data for it
+								//by using the plugin class. I do this for two reasons it may lock the database for less time then
+								//making a large sql query and 2 it will also allow for plugins which return multiple values. However
+								//I am not naive enough to think there is not a better way!
+
+								$entry_data	=	new stdClass();
+
+								//get the creator of the entry
+								$creator				=	$this->dbc->get_user_by_id($entry->creator_id);
+
+								//get comments for this entry
+								$comments				=	$this->dbc->get_entry_comments($entry->id);
+
+								//
+								$entry_data->creator		=	(!empty($creator)) ? fullname($creator)	: get_string('notfound','block_ilp');
+								$entry_data->created		=	userdate($entry->timecreated);
+								$entry_data->modified		=	userdate($entry->timemodified);
+								$entry_data->user_id		=	$entry->user_id;
+								$entry_data->entry_id		=	$entry->id;
+
+								
+								//does this report allow users to say it is related to a particular course
+								$has_courserelated	=	(!$this->dbc->has_plugin_field($r->id,'ilp_element_plugin_course')) ? false : true;
+
+								if (!empty($has_courserelated))	{
+									$courserelated	=	$this->dbc->has_plugin_field($r->id,'ilp_element_plugin_course');
+									//the should not be anymore than one of these fields in a report
+									foreach ($courserelated as $cr) {
+											$dontdisplay[] 	=	$cr->id;
+											$courserelatedfield_id	=	$cr->id;
+									}
+								}
+								
+								if ($has_courserelated) {
+									$coursename	=	false;
+									$crfield	=	$this->dbc->get_report_coursefield($entry->id,$courserelatedfield_id);
+									if (empty($crfield) || empty($crfield->value)) {
+										$coursename	=	get_string('allcourses','block_ilp');
+									} else if ($crfield->value == '-1') {
+										$coursename	=	get_string('personal','block_ilp');
+									} else {
+										$crc	=	$this->dbc->get_course_by_id($crfield->value);
+										if (!empty($crc)) $coursename	=	$crc->shortname;
+									}
+									$entry_data->coursename = (!empty($coursename)) ? $coursename : '';
+								}
+
+								foreach ($reportfields as $field) {
+
+									//get the plugin record that for the plugin
+									$pluginrecord	=	$this->dbc->get_plugin_by_id($field->plugin_id);
+
+									//take the name field from the plugin as it will be used to call the instantiate the plugin class
+									$classname = $pluginrecord->name;
+
+									// include the class for the plugin
+									include_once("{$CFG->dirroot}/blocks/ilp/classes/form_elements/plugins/{$classname}.php");
+
+									if(!class_exists($classname)) {
+										print_error('noclassforplugin', 'block_ilp', '', $pluginrecord->name);
+									}
+
+									//instantiate the plugin class
+									$pluginclass	=	new $classname();
+
+									if ($pluginclass->is_viewable() != false)	{
+										$pluginclass->load($field->id);
+
+										//call the plugin class entry data method
+										$pluginclass->view_data($field->id,$entry->id,$entry_data);
+									} else	{
+										$dontdisplay[]	=	$field->id;
+									}
+
+								}
+
+								include($CFG->dirroot.'/blocks/ilp/classes/dashboard/tabs/ilp_dashboard_reports_tab.html');
+
+							}
+						} else {
+
+							echo get_string('nothingtodisplay');
+
+						}
+
+						// load custom javascript
+						$module = array(
+							'name'      => 'ilp_dashboard_reports_tab',
+							'fullpath'  => '/blocks/ilp/classes/dashboard/tabs/ilp_dashboard_reports_tab.js',
+							'requires'  => array('yui2-dom', 'yui2-event', 'yui2-connection', 'yui2-container', 'yui2-animation')
+						);
+
+						// js arguments
+						$jsarguments = array(
+							'open_image'   => $CFG->wwwroot."/blocks/ilp/pix/icons/switch_minus.gif",
+							'closed_image' => $CFG->wwwroot."/blocks/ilp/pix/icons/switch_plus.gif",
+						);
+
+						// initialise the js for the page
+						$PAGE->requires->js_init_call('M.ilp_dashboard_reports_tab.init', $jsarguments, true, $module);
+						
+
+						$ilptargets = ob_get_contents();
+						ob_end_clean();
+					}
+					//RPM End
 				}
 			}
 			
