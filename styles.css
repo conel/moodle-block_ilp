@@ -59,6 +59,7 @@
 	width: 100%;
 	display:block; 
 	margin: 0 0 20px 0;
+	position:relative;
 }
 .ilp #studentinfo-container:after {
     content:".";
@@ -74,22 +75,28 @@
 }
 .ilp #middle-studentinfo { 
 	float:left; 
-	width:20%;
+	width:30%;
 	padding:0 10px; 
 }
 .ilp #right-studentinfo { 
 	float:right; 
-	width:60%;
+	width:50%;
 	padding:0 10px;
-	border-left: 1px solid #ccc;
 }
 
 .ilp #custom-studentinfo { 
 	width:100%;
 	display:block;
-	padding:0 10px;
-	border-left: 1px solid #ccc;
-	border:1px solid red !important;
+	padding:0;
+}
+
+.ilp #custom-studentinfo  table td { 
+	padding:0 0 0 10px;
+	margin:0;
+}
+
+.ilp #custom-studentinfo  table td.leftcol { 
+	padding:0 10px 0 0;
 }
 
 .ilp #studentinfo-container p{ 
