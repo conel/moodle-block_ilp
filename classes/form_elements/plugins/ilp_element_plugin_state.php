@@ -214,7 +214,7 @@ class ilp_element_plugin_state extends ilp_element_plugin_itemlist{
 			 		} 
 
 			 		//add the icon
-			 		$entryobj->$fieldname	.=	(!empty($img)) ?  "<img src='{$CFG->wwwroot}/blocks/ilp/pix/icons/{$img}' alt='' width='32px' height='32px' />" : '';
+			 		$entryobj->$fieldname	.=	(!empty($img)) ?  "<img class='statimg' src='{$CFG->wwwroot}/blocks/ilp/pix/icons/{$img}' alt='' width='32px' height='32px' />" : '';
 			 	}
 	 		}
 	  }

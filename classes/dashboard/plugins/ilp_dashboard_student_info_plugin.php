@@ -233,6 +233,75 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			$ilpstudentprogress = "No Student progress added";
 			$ilptargetgrade = "No Target Grade added";
 			//RPM end
+
+			/*
+
+			//RPM 2013-02-25 we need to find out if there are any cause for concerns or disciplinaries in our reports
+			//to ensure this report is iterated before the student progress box where a message is displayed we check here first
+			
+			//UPDATE - this section may not be required if it is sufficient to shwo progress bars beneath the students status instead.
+			// commented out for now
+			
+			$cfc = "";
+			$disciplinary = "";
+			
+			if (!empty($reports) ) {
+				foreach ($reports as $r) {
+				
+				if ($r->name == "Cause For Concern" || $r->name == "Disciplinary")   {
+					//iterate any report entries and if they are current update the cfc or Disciplinary text;
+					$reportentries	=	$this->dbc->get_user_report_entries($r->id,$this->student_id);
+					$reportfields		=	$this->dbc->get_report_fields_by_position($r->id);
+					
+					if (!empty($reportentries)) {
+						//iterate the report entries
+						foreach ($reportentries as $entry)	{
+							//iterate the reportentries fields to find the right one
+							foreach ($reportfields as $field) {
+
+								//get the plugin record that for the plugin
+								$pluginrecord	=	$this->dbc->get_plugin_by_id($field->plugin_id);
+
+								//take the name field from the plugin as it will be used to call the instantiate the plugin class
+								$classname = $pluginrecord->name;
+
+								// include the class for the plugin
+								include_once("{$CFG->dirroot}/blocks/ilp/classes/form_elements/plugins/{$classname}.php");
+
+								if(!class_exists($classname)) {
+									print_error('noclassforplugin', 'block_ilp', '', $pluginrecord->name);
+								}
+
+								//instantiate the plugin class
+								$pluginclass	=	new $classname();
+
+								if ($pluginclass->is_viewable() != false)	{
+									$pluginclass->load($field->id);
+
+									
+									//RPM TBC - once the cause for concern report is fixed to use a valid field for concern status' then we can update the checking aspect here
+									
+									//if field name = . . .and field value = . . . 
+									//$cfc = "Student has a cause for concern"
+									
+									//sections below are probably not required.
+									
+									//call the plugin class entry data method
+									$pluginclass->view_data($field->id,$entry->id,$entry_data);
+								} else	{
+									$dontdisplay[]	=	$field->id;
+								}
+
+							}
+						}
+						}
+						}				
+					}
+				}
+			//RPM end
+			
+			*/
+			
 			
 			//we are going to output the add any reports that have state fields to the percentagebar array 
 			if (!empty($reports) ) {
@@ -274,7 +343,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 						
-						echo "<h2>{$icon}Latest Tutor Review</h2>";
+						echo "<h2 class=\"summary\">{$icon}Latest Tutor Review</h2>";
+						
+						//RPM - new function to draw add / edit button for this report summary if permission exists.
+						$this->addreportbutton($r);
+						//RPM end
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -406,7 +479,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 						
-						echo "<h2>{$icon}Your Progress</h2>";
+						echo "<h2 class=\"summary\">{$icon}Your Progress</h2>";
+						
+						//RPM - new function to draw add / edit button for this report summary if permission exists.
+						$this->addreportbutton($r);
+						//RPM end
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -497,6 +574,13 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 
 							}
 
+							//RPM 2013-02-25 get the last login for thew student who this ILP is for.
+							$lastlogin = "never";
+							if ($student->lastlogin <> 0) {
+								$lastlogin = userdate($student->lastlogin);
+							}
+							//RPM end
+							
 							//new file to handle the different layout of this report item
 							include($CFG->dirroot.'/blocks/ilp/classes/dashboard/plugins/ilp_dashboard_student_progress.html');
 
@@ -505,12 +589,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 							echo get_string('nothingtodisplay');
 
 						}
-
+						
 						$ilpstudentprogress = ob_get_contents();
 						ob_end_clean();
+						
 					}
-					
-					
 					
 					
 					
@@ -530,7 +613,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 
-						echo "<h2>{$icon}{$r->name}</h2>";
+						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
+						
+						//RPM - new function to draw add / edit button for this report summary if permission exists.
+						$this->addreportbutton($r);
+						//RPM end
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -666,7 +753,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 
-						echo "<h2>{$icon}{$r->name}</h2>";
+						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
+						
+						//RPM - new function to draw add / edit button for this report summary if permission exists.
+						$this->addreportbutton($r);
+						//RPM end
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -767,10 +858,6 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 						ob_end_clean();
 					}
 					
-					
-					
-					
-					
 					//RPM End
 				}
 			}
@@ -809,6 +896,80 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 		
 		
 	}
+	
+	/**
+	 * RPM - use this function to display the add / edit buttons for reports that are shown as an overview on the main ILP page.
+	 *
+  	 * takes the report as a parameter
+	 */
+	 
+	function addreportbutton($report) {
+	
+	//RPM 2013-02-11 need to add in the edit / add buttons if the user has permission
+							//code taken from ilp_dashboard_entries_tab.php to determine permissions and then show the button
+							global $PAGE, $USER;						
+							$role_ids	=	ilp_get_user_role_ids($PAGE->context,$USER->id);
+							$authuserrole	=	$this->dbc->get_role_by_name(ILP_AUTH_USER_ROLE);
+							if (!empty($authuserrole)) $role_ids[]	=	$authuserrole->id;
+							
+							$addcapability		=	$this->dbc->get_capability_by_name('block/ilp:addreport');
+							$editcapability		=	$this->dbc->get_capability_by_name('block/ilp:editreport');
+							$viewcapability		=	$this->dbc->get_capability_by_name('block/ilp:viewreport');
+							$caneditreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$editcapability->id);
+							$canaddreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$addcapability->id);
+							$canviewreport		=	$this->dbc->has_report_permission($report->id,$role_ids,$viewcapability->id);							
+
+							if (!empty($caneditreport) || !empty($canaddreport) || !empty($canviewreport)) {
+
+								$detail					=	new stdClass();
+								$detail->report_id		=	$report->id;
+								//does this report have a state field
+
+								//get all entries for this student in report
+                                $detail->entries		=	($this->dbc->count_report_entries($report->id,$this->student_id)) ? $this->dbc->count_report_entries($report->id,$this->student_id) : 0;
+                                $detail->state_report	=	false;
+
+								//get the last updated report entry
+                                $lastentry				=	$this->dbc->get_lastupdatedentry($report->id,$this->student_id);
+                                $lastupdate				=	$this->dbc->get_lastupdatetime($report->id,$this->student_id);
+
+								$detail->frequency		=	$report->frequency;
+
+								//if the report does not allow mutiple entries (frequency is empty)
+								//then we need to find a report entry instance this will be editable
+								$detail->editentry	=	(empty($detail->frequency) && !empty($lastentry)) ?  $lastentry->id : false;
+								$detail->lastmod	=	(!empty($lastupdate->timemodified)) ?  userdate($lastupdate->timemodified , get_string('strftimedate', 'langconfig')) : get_string('notapplicable','block_ilp');
+								$detail->canadd	    = ($canaddreport) ? true : false;
+								$detail->canedit	= ($caneditreport) ? true : false;
+
+							}
+							
+							//RPM - code below taken straight from ilp_dashboard_entries_tab.html
+							//Will still show edit correctly vs add depending on the report in question
+							
+							?>
+							<div id="right-entries">
+							<div class='add'>
+								<?php 
+									//edit entry will empty except when the report does not allow multiple entries and a entry already exits
+				  
+									if (empty($detail->editentry) && !empty($detail->canadd)) { ?>
+									<a href='<?php echo $CFG->wwwroot."/blocks/ilp/actions/edit_reportentry.php?user_id={$this->student_id}&report_id={$report->id}&course_id={$this->course_id}"; ?>' ><?php echo get_string('addnew','block_ilp'); ?></a>
+									
+								<?php }  else if (!empty($detail->canedit)) { ?>
+									<a href='<?php echo $CFG->wwwroot."/blocks/ilp/actions/edit_reportentry.php?user_id={$this->student_id}&report_id={$report->id}&course_id={$this->course_id}&entry_id={$report->editentry}"; ?>' ><?php echo get_string('edit'); ?></a>			
+									
+								<?php } ?>
+							</div>
+							</div>
+							<?php			
+														
+							//RPM end
+	
+	
+	
+	}
+	
 	
 	/**
 	 * Adds the string values from the tab to the language file

@@ -308,7 +308,7 @@ class ilp_element_plugin_date_deadline extends ilp_element_plugin {
 	 			//check if the entry is in a unset state 
 				$recordstate	=	$this->dbc->count_report_entries_with_state($entryrecord->report_id,$entryrecord->user_id,ILP_STATE_UNSET,false,$entry_id);
 	 			if (!empty($recordstate) && $entry->value < time()) {
-  			 		$img	=	 "<img src='{$CFG->wwwroot}/blocks/ilp/pix/icons/overdue.jpg' alt='' width='32px' height='32px' />";
+  			 		$img	=	 "<img class='statimg' src='{$CFG->wwwroot}/blocks/ilp/pix/icons/overdue.jpg' alt='' width='32px' height='32px' />";
 	 			} 
 	 		}
 	 		$entryobj->$fieldname	=	userdate(html_entity_decode($entry->value),'%a %d %B %Y') ." ".$img;
