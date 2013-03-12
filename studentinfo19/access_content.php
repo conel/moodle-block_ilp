@@ -19,6 +19,7 @@ if(isset($USER->access)) {
     $accessinfo = $USER->access = get_user_access_sitewide($USER->id);
 }
 
+/*
 // what courses can this user view LPRs for
 $views = get_user_courses_bycap($USER->id, 'block/lpr:read', $accessinfo, true);
 $can_view = !empty($views);
@@ -30,4 +31,5 @@ $can_write = !empty($writes);
 // what courses can this user print LPRs for
 $prints = get_user_courses_bycap($USER->id, 'block/lpr:print', $accessinfo, true);
 $can_print = !empty($prints);
+*/
 ?>

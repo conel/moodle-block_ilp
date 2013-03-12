@@ -504,4 +504,9 @@
 
 /* Buttons */ 
 
-
+/* boxes on the studentinfo page */
+div.stuinfobox
+	{
+	border: 2px solid #d2d2d2 !important;
+	margin-bottom:10px;
+	}

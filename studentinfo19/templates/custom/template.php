@@ -2,6 +2,7 @@
 include ('access_context.php'); 
 require_once("{$CFG->dirroot}/blocks/ilp/studentinfo19/dbconnect.php"); 
 require_once("{$CFG->dirroot}/blocks/ilp/studentinfo19/access_content.php");
+require_once("{$CFG->dirroot}/blocks/ilp/studentinfo19/cache.class.php");
 $query = "SELECT * FROM mdl_user where id = $userid";
 global $DB;
 if ($ausers = $DB->get_records_sql($query)) {
@@ -133,134 +134,134 @@ foreach($cats as $cat) {
 	$table->no_sorting($cat);
 }
 	
+
+$html .= '<div id="bksb_ia_results">';
+$html .= '<h4>Initial Assessments</h4>';
+echo $html;
+$html = "";
 // Start working -- this is necessary as soon as the niceties are over
 $table->setup();
 
 $bksb_results = $bksb->getResults($conel_id);
 $row = $bksb_results;
-
 $table->add_data($row);
-/*
+
 ob_start();
 $table->print_html();  // Print the whole table
 $ia_html = ob_get_contents();
 ob_end_clean();
-*/
 
-$html .= '<div id="bksb_ia_results">';
-$html .= '<h4>Initial Assessments</h4>';
 $html .= $ia_html;
 $html .= '</div>';
-$html .= '<div id="bksb_diag_results">';
+$html .= '<div id="bksb_diag_results" class="stuinfobox">';
 $html .= '<h4>Diagnostic Overviews</h4>';
 
 //$baseurl = $CFG->wwwroot.'/blocks/bksb/bksb_diagnostic_overview.php?courseid='.$courseid;
 $assessment_types = $bksb->ass_types;
 
-$results_found = false;
-foreach ($assessment_types as $key => $value) {
+$sessid = $bksb->getBksbSessionNo_bypass($conel_id);
 
-	$ass_type = $bksb->ass_types[$key];
-	$bksb->getDiagnosticResults($conel_id, $key, $bksb_results);
-	//print_object($bksb_results);
+//$html .= '<p><br /><a href="http://bksb/bksb_Reporting/Reports/DiagReport.aspx?session='.$sessid.'">View results in BKSB</a></p>';
+//$html .= '<p><br /><a href="/blocks/bksb/diagnostic_assessment.php?id='.$userid.'&course_id='.$_GET['courseid'].'">View results in BKSB</a></p>';
 
-	// Check if bksb_results are blank
-	$results = true;
-	if (!in_array('X', $bksb_results) && !in_array('P', $bksb_results)) {
-	   $results = false; 
-	} else {
-		$results = true;
-		$results_found = true;
-	}
 
-	if ($results) {
+$access_is_teacher = has_capability('block/bksb:view_all_results', $coursecontext);
+$access_is_student = has_capability('block/bksb:view_own_results', $coursecontext);
+$access_is_god = false;
+if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) $access_is_god = true;
 
-		$diag_html .= "<h5>$ass_type Assessment</h5>";
+$bksb = new BksbReporting();
+// Return from cache if set
+    Cache1::init('user-'.$user->id.'-da-ilp-html.cache', $bksb->cache_life);
+    if (Cache1::cacheFileExists()) {
+        $diag_html = Cache1::getCache();
+    } else {
+        $best_scores = $bksb->getBestScores($conel_id);
+        $user_sessions = $bksb->getBksbDiagSessions($conel_id);
+        $existing_diagnostics = $bksb->filterAssessmentsFromSessions($user_sessions);
 
-		$no_questions = $bksb->getNoQuestions($key);
+        $results_found = false;
 
-		$questions = array();
+        ob_start();
+        echo $header;
+        foreach ($existing_diagnostics as $ass_no => $ass_type) {
 
-		// Create array of questions for num returned
-		for ($i=1; $i<=$no_questions; $i++) {
-		   $questions[] = $i; 
-		}
-		// nkowald - 2010-10-05 - Add question % column
-		$questions[] = 'BKSB %';
-		
-		$tablecolumns = $questions;
-		$tableheaders = $questions;
-		
-		$table = new flexible_table('mod-targets');
-						
-		$table->define_columns($tablecolumns);
-		$table->define_headers($tableheaders);
-		$table->define_baseurl($baseurl);
-		$table->collapsible(false);
-		$table->initialbars(false);
-		$table->set_attribute('cellspacing', '0');
-		$table->set_attribute('id', 'bksb_results_' . $key);
-		$table->set_attribute('class', 'bksb_results');
-		$table->set_attribute('width', '90%');
-		$table->set_attribute('align', 'center');
-		foreach ($questions as $question) {
-			$table->no_sorting($question);
-		}
-			
-		// Start working -- this is necessary as soon as the niceties are over
-		$table->setup();
-			
-		// Change the colour of our P to green (add food colouring?)
-		$bksb_results = str_replace('P', '<span class="bksb_passed">P</span>', $bksb_results);
-		
-		$bksb_results = str_replace('Tick', '<img src="'.$CFG->wwwroot.'/blocks/bksb/tick.png" alt="passed" width="20" height="19" />', $bksb_results);
+            $bksb_results = $bksb->getDiagnosticResults($conel_id, $ass_no, $best_scores);
+            if ($bksb_results === false) continue;
 
-		// nkowald - 2010-10-05 - Convert 'X' to an icon
-		$bksb_results = str_replace('X', '<img src="'.$CFG->wwwroot.'/blocks/bksb/red-x.gif" alt="Not Yet Passed" width="15" height="15" />', $bksb_results);
-		
-		$percentage = ($bksb->getBksbPercentage($conel_id, $key)) ? $bksb->getBksbPercentage($conel_id, $key) : '-';
-		
-		$bksb_session_no = $bksb->getBksbSessionNo($conel_id, $key);
-		$bksb_results_url = 'http://bksb/bksb_Reporting/Reports/DiagReport.aspx?session='.$bksb_session_no;	
-		$bksb_results[] = '<a href="'.$bksb_results_url.'" class="percentage_link" title="Go to BKSB results page" target="_blank">'.$percentage.'%</a>';
-		
-		$table->add_data($bksb_results);
+            $results_found = true;
 
-		ob_start();
-		$table->print_html();  // Print the whole table
-		$diag_html .= ob_get_contents();
-		ob_end_clean();
+            print_heading('<span>'.$ass_type.'</span> Assessment');
 
-		$overviews = $bksb->getAssDetails($key);
-		$diag_html .= '<table class="bksb_key">';
-		$diag_html .= '<tr><td>';
-		$diag_html .= "<h5>Questions</h5>";
-		$diag_html .= "<ol>";
-		foreach ($overviews as $overview) {
-			if ($overview[0] != $overview[1]) {
-				$diag_html .= "<li>".$overview[0]."<span style=\"color:#CCC;\"> &mdash; ".$overview[1]."</span></li>";
-			} else {
-				$diag_html .= "<li>".$overview[0]."</li>";
-			}
-		}
+            // Create array of questions for num returned
+            $questions = range(1, count($bksb_results));
+            // nkowald - 2010-10-05 - Add question % column
+            $questions[] = 'BKSB %';
+            
+            $tablecolumns = $questions;
+            $tableheaders = $questions;
 
-		$diag_html .= "</ol>";
-		$diag_html .= '</td></tr>';
-		$diag_html .= '</table>';
-	}
+            $table = new flexible_table('bksb_do');
+                            
+            $table->define_columns($tablecolumns);
+            $table->define_headers($tableheaders);
+            $table->define_baseurl($baseurl);
+            $table->collapsible(false);
+            $table->initialbars(false);
+            $table->set_attribute('cellspacing', '0');
+            $table->set_attribute('id', 'bksb_results_' . $ass_no);
+            $table->set_attribute('class', 'bksb_results');
+            $table->set_attribute('width', '95%');
+            $table->set_attribute('align', 'center');
+            foreach ($questions as $question) {
+                $table->no_sorting($question);
+            }
+                
+            $table->setup();
+            $diag_results = array();
+            foreach ($bksb_results as $res) {
+                $diag_results[] = $bksb->getHTMLResult($res[1]);
+            }
+                
+            $bksb_session_id = isset($user_sessions[$ass_type]) ? $user_sessions[$ass_type] : 0;
+            $percentage = $bksb->getBksbPercentage($bksb_session_id);
+            
+            $bksb_results_url = 'http://bksb/bksb_Reporting/Reports/DiagReport.aspx?session='.$bksb_session_id;	
+            $diag_results[] = '<span style="white-space:nowrap";>'.$percentage.'%<br /><a href="'.$bksb_results_url.'" class="percentage_link" title="Go to BKSB results page" target="_blank">View on BKSB</a></span>';
+            
+            $table->add_data($diag_results);
 
-}
+            $table->print_html();  // Print the table
 
-$diag_html = "";
+            $overviews = $bksb->getAssDetails($ass_no);
+            echo '<table class="bksb_key" width="95%">';
+            echo '<tr><td>';
 
-if ($results_found == false) {
-	$diag_html .= '<table><tr><td><b>No diagnostic overviews for this student.</b></td></tr></table>';
-}
+            echo "<h5>Questions</h5>";
+            echo "<ol>";
+            foreach ($overviews as $overview) {
+                echo "<li>".$overview[0]."<span style=\"color:#CCC;\"> &mdash; ".$overview[1]."</span></li>";
+            }
+            echo "</ol>";
+            echo '</td></tr>';
+            echo '</table>';
+
+        } // foreach
+
+        if ($results_found == false) {
+            echo '<center><p><b>No diagnostic overviews for this student.</b></p></center>';
+        }
+        echo '<br />';
+
+        $diag_html = ob_get_contents();
+        ob_end_clean();
+        Cache1::setCache($diag_html);
+    }
 
 $html .= $diag_html;
 
 
-// Predicted Functional Skills grades
+// Predicted Functional Skills grades - Not working correctly
 
 //$pstatus = $mis->Execute("SELECT COURSE_CODE,ACADEMIC_YEAR,MODULE_DESC,ENROL_STATUS FROM FES.MOODLE_CURRENT_ENROLMENTS WHERE ID = '381800'");
 $pstatus = $mis->Execute("SELECT COURSE_CODE,ACADEMIC_YEAR,MODULE_DESC,ENROL_STATUS FROM FES.MOODLE_CURRENT_ENROLMENTS WHERE ID = '$user->idnumber'");
@@ -319,9 +320,9 @@ foreach ($stes as $key => $value) {
 	
 	$i++;
 }
-
-$html .= '<div id="predicted_outcome">';
-$html .= '<h4>Predicted Functional Skills grades</h4>';
+$html .= '</div>';
+$html .= '<div id="predicted_outcome" class="stuinfobox">';
+$html .= '<h4>Predicted Functional Skills grades (TBC)</h4>';
 
 $html .= '<table id="predicted-outcomeFS ICT" class="flexible bksb_results" cellspacing="0" align="center" width="90%">
 <tbody>
@@ -339,8 +340,11 @@ $html .= '<table id="predicted-outcomeFS ICT" class="flexible bksb_results" cell
 <th class="header c5" scope="col">1<div class="commands"></div></th>
 <th class="header c6" scope="col">2<div class="commands"></div></th>
 <th class="header c7" scope="col">3<div class="commands"></div></th>
-</tr>
-<tr class="r0">';
+</tr>';
+
+/* this part isnt working! 
+
+$html .= '<tr class="r0">';
 
 foreach($fsrow as $fsrr) {
 	foreach($fsrr as $key => $value) {
@@ -348,79 +352,183 @@ foreach($fsrow as $fsrr) {
 	}
 }
 
-$html .= '</tr>
-</tbody>
+$html .= '</tr>';
+*/
+$html .= '</tbody>
 </table>';
-
-$html .= '</div>';
 			
 $html .= '</div>';
 
 echo $html;
 
-echo '</div>';
+//RPM 11-03-2013
+//Target grade section - going to add in target grade exactly the same way as it is shown in ilp_dashboard_student_info_plugin.php
 
-/* target grade now handled in ILP
-// view/set target grade
+echo '<div id="stuinfotarget" class="ilp stuinfobox" style="width:50%;">';
 
-if($can_write) {
-	if(isset($_POST['tgrade'])){
-		$tgrade = (int)$_POST['tgrade'];
-		set_target_grade($user->id, $tgrade);	
+require_once($CFG->dirroot.'/blocks/ilp/classes/dashboard/plugins/ilp_dashboard_student_info_plugin.php');
+
+$dash = new ilp_dashboard_student_info_plugin($user->id);
+
+$reports = $dash->dbc->get_reports(ILP_ENABLED);
+
+$stuinfotargetgrade = "No Target Grade added";
+
+if (!empty($reports) ) {
+	foreach ($reports as $r) {
+		if ($dash->dbc->has_plugin_field($r->id,'ilp_element_plugin_state')) {
+
+			$reportinfo				=	new stdClass();
+			$reportinfo->total		=	$dash->dbc->count_report_entries($r->id,$dash->student_id);
+			$reportinfo->actual		=	$dash->dbc->count_report_entries_with_state($r->id,$dash->student_id,ILP_STATE_PASS);
+			//retrieve the number of entries that have the not counted state
+			$reportinfo->notcounted	=	$dash->dbc->count_report_entries_with_state($r->id,$dash->student_id,ILP_STATE_NOTCOUNTED);
+
+			 //if total_possible is empty then there will be nothing to report
+			if (!empty($reportinfo->total)) {
+				$reportinfo->total     =   $reportinfo->total -  $reportinfo->notcounted;
+				//calculate the percentage
+				$reportinfo->percentage	=	$reportinfo->actual/$reportinfo->total	* 100;
+			
+				$reportinfo->name	=	$r->name;
+
+				$percentagebars[]	=	$reportinfo;
+			}
+			
+		}				
+		
+		
+		if ($r->name == "Target Grade") {
+			
+			//RPM - another copy and paste from ilp_dashboard_reports_tab.php
+			//works in the same way as the targets one but uses a custom html page to isplay them like the studnt progress one does.
+			
+			$reportentries	=	$dash->dbc->get_user_report_entries($r->id,$dash->student_id);
+			$reportfields = $dash->dbc->get_report_fields_by_position($r->id);
+			
+			$access_report_editreports	= false;
+			
+			//start buffering output
+			ob_start();
+			
+			$icon =	(!empty($r->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$r->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
+		
+			$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
+			
+			//RPM - new function to draw add / edit button for this report summary if permission exists.
+			$dash->addreportbutton($r);
+			//RPM end
+			
+			echo "<h4>{$r->name}</h4>";
+			
+			//create the entries list var that will hold the entry information
+			$entrieslist	=	array();
+
+			if (!empty($reportentries)) {
+				foreach ($reportentries as $entry)	{
+				// RPM - need to change to only show the first record : $entry = $reportentries[0]; doesnt work, think it is a datarow
+
+					//TODO: is there a better way of doing this?
+					//I am currently looping through each of the fields in the report and get the data for it
+					//by using the plugin class. I do this for two reasons it may lock the database for less time then
+					//making a large sql query and 2 it will also allow for plugins which return multiple values. However
+					//I am not naive enough to think there is not a better way!
+
+					$entry_data	=	new stdClass();
+
+					//get the creator of the entry
+					$creator				=	$dash->dbc->get_user_by_id($entry->creator_id);
+
+					//get comments for this entry
+					$comments				=	$dash->dbc->get_entry_comments($entry->id);
+
+					//
+					$entry_data->creator		=	(!empty($creator)) ? fullname($creator)	: get_string('notfound','block_ilp');
+					$entry_data->created		=	userdate($entry->timecreated);
+					$entry_data->modified		=	userdate($entry->timemodified);
+					$entry_data->user_id		=	$entry->user_id;
+					$entry_data->entry_id		=	$entry->id;
+
+					//does this report allow users to say it is related to a particular course
+					$has_courserelated	=	(!$dash->dbc->has_plugin_field($r->id,'ilp_element_plugin_course')) ? false : true;
+
+					/*
+					//doesn't have course related features but this could be reinstated later if required
+					if (!empty($has_courserelated))	{
+						$courserelated	=	$this->dbc->has_plugin_field($r->id,'ilp_element_plugin_course');
+						//the should not be anymore than one of these fields in a report
+						foreach ($courserelated as $cr) {
+								$dontdisplay[] 	=	$cr->id;
+								$courserelatedfield_id	=	$cr->id;
+						}
+					}
+					
+					if ($has_courserelated) {
+						$coursename	=	false;
+						$crfield	=	$this->dbc->get_report_coursefield($entry->id,$courserelatedfield_id);
+						if (empty($crfield) || empty($crfield->value)) {
+							$coursename	=	get_string('allcourses','block_ilp');
+						} else if ($crfield->value == '-1') {
+							$coursename	=	get_string('personal','block_ilp');
+						} else {
+							$crc	=	$this->dbc->get_course_by_id($crfield->value);
+							if (!empty($crc)) $coursename	=	$crc->shortname;
+						}
+						$entry_data->coursename = (!empty($coursename)) ? $coursename : '';
+					}
+					*/
+					
+					foreach ($reportfields as $field) {
+
+						//get the plugin record that for the plugin
+						$pluginrecord	=	$dash->dbc->get_plugin_by_id($field->plugin_id);
+
+						//take the name field from the plugin as it will be used to call the instantiate the plugin class
+						$classname = $pluginrecord->name;
+
+						// include the class for the plugin
+						include_once("{$CFG->dirroot}/blocks/ilp/classes/form_elements/plugins/{$classname}.php");
+
+						if(!class_exists($classname)) {
+							print_error('noclassforplugin', 'block_ilp', '', $pluginrecord->name);
+						}
+
+						//instantiate the plugin class
+						$pluginclass	=	new $classname();
+
+						if ($pluginclass->is_viewable() != false)	{
+							$pluginclass->load($field->id);
+
+							//call the plugin class entry data method
+							$pluginclass->view_data($field->id,$entry->id,$entry_data);
+						} else	{
+							$dontdisplay[]	=	$field->id;
+						}
+
+					}
+
+					include($CFG->dirroot.'/blocks/ilp/classes/dashboard/plugins/ilp_dashboard_target_grades.html');
+
+				}
+			} else {
+
+				echo get_string('nothingtodisplay');
+
+			}				
+
+			$stuinfotargetgrade = ob_get_contents();
+			ob_end_clean();
+		}
+		
+		//RPM End
 	}
 }
+echo $stuinfotargetgrade;
 
-$targets=get_records('targets','','','id');
-$target_grade = (get_target_grade($user->id)) ? get_target_grade($user->id) : 'not yet set';
-                
-echo '<div class="generalbox" id="ilp-student_info-overview">';
-echo '<div class="target_grade">';
-if($can_write) {
-	echo '<b>Update Target Grade</b>'; 
-	echo '<form method="post">';
-	echo '<select name="tgrade" onchange="this.form.submit();">';
-	foreach($targets as $target) {
-		echo '<option value='.$target->id.' '.($target->name==$target_grade?'selected="selected"':'').'>'.$target->name.'</option>';
-	}
-	echo '</select>';
-	echo '</form>';
-} else {
-	echo '<b>Target Grade:</b> '. $target_grade;
-}
 
-$grades = get_all_target_grade($user->id, 100);
-if(!empty($grades)){
-	echo '<br /><b>Previous Target Grades:</b>';
-	foreach($grades as $grade){
-		echo '<br>'.$grade[0].' &nbsp; '.$grade[1];
-	}
-}
 
-echo '</div>';
-echo '</div>';
-*/
+echo '</div></div>';
 
-/*
-// Not sure if this is needed, will restore if so
 
-if($config->ilp_show_student_info == '1' && ($view == 'info' || $view == 'all')) {
-    echo '<div class="generalbox" id="ilp-student_info-overview">'; 
-    echo '<h3>Student Overall Goal</h3>'; 
-    display_ilp_student_info($user->id,$courseid,true,false); 
-    echo '</div>';
-}
-
-if($config->ilp_show_personal_reports == 1 && ($view == 'personal' || $view == 'all')) { 
-    echo '<div class="generalbox" id="ilp-personal_report-overview">';
-    display_ilp_personal_report($user->id,$courseid);
-    echo '</div>';
-}
- 
-if($config->ilp_show_subject_reports == 1 && ($view == 'subject' || $view == 'all')) {
-    echo '<div class="generalbox" id="ilp-subject_report-overview">';
-    display_ilp_subject_report($user->id,$courseid);
-    echo '</div>';  
-}
-*/
 
 ?>

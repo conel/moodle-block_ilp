@@ -19,7 +19,9 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
     public function display(){
         global $CFG;
         if (!empty($this->data)) {
-	        // set up the flexible table for displaying the data
+	        //no longer using the flextable to display this
+			/*
+			// set up the flexible table for displaying the data
 	
 	        //instantiate the ilp_ajax_table class
 	        $flextable = new ilp_mis_ajax_table( 'attendance_plugin_simple',true ,'ilp_mis_attendance_plugin_simple'); 
@@ -41,22 +43,45 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
 	        
 	        //setup the flextable
 	        $flextable->setup();
-	        
+	        */
 
 	        
 	        //add the row to table
 	        foreach( $this->data as $row ){
 	            $data = array();
-                $att = $this->percent_format( $row[ 0 ], true, true, "attendance" ) . "<br /> " . get_string('ilp_mis_attendance_plugin_simple_attendancetarget','block_ilp') . ": " . $this->percent_format(get_config('block_ilp','mis_plugin_simple_attendancetarget'), true, false);
-                $punc = $this->percent_format( $row[ 1 ] , true, true, "punctuality"). "<br /> " . get_string('ilp_mis_attendance_plugin_simple_punctualitytarget','block_ilp') . ": " . $this->percent_format(get_config('block_ilp','mis_plugin_simple_punctualitytarget'), true, false);
+                $att = $this->percent_format( $row[ 0 ], true );
+				$rawatt = $row[ 0 ];
+                $punc = $this->percent_format( $row[ 1 ],true );
+				$rawpunc = $row[ 1 ];
 	            $data[ 'attendance' ]  = $att;
 	            $data[ 'punctuality' ] = $punc;
-	            $flextable->add_data_keyed( $data );
+	            //$flextable->add_data_keyed( $data );
 	        }
 	        
 	        //buffer out as flextable sends its data straight to the screen we dont want this  
 			ob_start();
 			
+			//get the attendance and punc colours to pass to the html for display
+			$ceiling = get_config( 'block_ilp', 'passpercent' );
+			$floor = get_config( 'block_ilp', 'failpercent' );
+			$attcolour = get_config( 'block_ilp' , 'midcolour' );
+			$punccolour = get_config( 'block_ilp' , 'midcolour' );
+
+			if( $rawatt <= $floor ){
+				$attcolour = get_config( 'block_ilp' , 'failcolour' );
+			}
+			elseif( $rawatt >= $ceiling ){
+				$attcolour = get_config( 'block_ilp' , 'passcolour' );
+			}
+							
+			if( $rawpunc <= $floor ){
+				$punccolour = get_config( 'block_ilp' , 'failcolour' );
+			}
+			elseif( $rawpunc >= $ceiling ){
+				$punccolour = get_config( 'block_ilp' , 'passcolour' );
+			}
+				
+			//set variables to display detailed attendance link in html page
 			$userid = optional_param('user_id', 0, PARAM_INT);
 			$courseid = optional_param('course_id', SITEID, PARAM_INT);
 			
@@ -98,60 +123,6 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
         }
     }
     
-	
-	
-	protected function percent_format( $inpdecimal , $percentagealready=false , $colourbg=true, $measure="attendance" ){
-		//override from ilp_mis_attendance_plugin to use config values for this instead of overall pass fail
-        if( $percentagealready ){
-            $decimal = str_replace( '%' , '' , $inpdecimal );
-        }
-        else{
-            $decimal = $inpdecimal;
-        }
-        if( !is_numeric( $decimal ) ) return $inpdecimal;   //if input is not numeric, simply return it untouched
-        if( $percentagealready ){
-            $percentage = number_format( $decimal, 0 );
-        }
-        else{
-            $percentage = number_format( 100 * $decimal, 0 );
-        }
-        $percentage .= '%';
-        if( $colourbg ){
-            $this->init_bgcolours();
-            return $this->format_background_by_value( "$percentage", $measure );
-        }
-        else{
-            return "$percentage";
-        }
-    }
-	
-	
-	
-	protected function format_background_by_value( $percentage, $measure ){
-		//overrride from ilp_mis_plugin to use the config values for this plugin rather than the overall pass/fail
-		//we only have the college target, no floor / ceiling
-        global $CFG;
-        $n = intval( $percentage );
-        if ($measure == "attendance") {
-			$target = get_config( 'block_ilp', 'mis_plugin_simple_attendancetarget' );
-			}
-		else {
-			$target = get_config( 'block_ilp', 'mis_plugin_simple_punctualitytarget' );
-		}
-			
-
-        //get the colours for each status
-
-        if( $n < $target ){
-            $colour = $this->failcolour;
-        }
-        elseif( $n >= $target ){
-            $colour = $this->passcolour;
-        }
-        //return html_writer::tag( 'span', $percentage, array( 'style' => "background-color:$colour;display:block" ) );
-        return  "<span style='background-color:$colour;display:block'>$percentage</span>";
-    }
-	
     
     public function plugin_type(){
         return 'overview';
@@ -179,12 +150,8 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
  	 	$this->config_text_element($mform,'mis_plugin_simple_studentid',get_string('ilp_mis_attendance_plugin_simple_studentid', 'block_ilp'),get_string('ilp_mis_attendance_plugin_simple_studentiddesc', 'block_ilp'),'studentID');
  	 	
  	 	$this->config_text_element($mform,'mis_plugin_simple_punctuality',get_string('ilp_mis_attendance_plugin_simple_punctuality', 'block_ilp'),get_string('ilp_mis_attendance_plugin_simple_punctualitydesc', 'block_ilp'),'punctuality');
-		
-		$this->config_text_element($mform,'mis_plugin_simple_punctualitytarget',get_string('ilp_mis_attendance_plugin_simple_punctualitytarget', 'block_ilp'),get_string('ilp_mis_attendance_plugin_simple_punctualitytargetdesc', 'block_ilp'),'95');
 
  	 	$this->config_text_element($mform,'mis_plugin_simple_attendance',get_string('ilp_mis_attendance_plugin_simple_attendance', 'block_ilp'),get_string('ilp_mis_attendance_plugin_simple_attendancedesc', 'block_ilp'),'attendance');
-		
-		$this->config_text_element($mform,'mis_plugin_simple_attendancetarget',get_string('ilp_mis_attendance_plugin_simple_attendancetarget', 'block_ilp'),get_string('ilp_mis_attendance_plugin_simple_attendancetargetdesc', 'block_ilp'),'95');
 
         $options = array(
             ILP_IDTYPE_STRING => get_string('stringid', 'block_ilp'),
@@ -223,17 +190,12 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
         $string['ilp_mis_attendance_plugin_simple_punctuality']				= 'Punctuality';
         $string['ilp_mis_attendance_plugin_simple_pluginname']				= 'Simple Overview';
         $string['ilp_mis_attendance_plugin_simple_pluginnamesettings']		= 'Simple Attendance Overview Configuration';
-		
-		$string['ilp_mis_attendance_plugin_simple_attendancetarget']		= 'College Target';
-		$string['ilp_mis_attendance_plugin_simple_attendancetargetdesc']	= 'College Attendance Target';
-		$string['ilp_mis_attendance_plugin_simple_punctualitytarget']		= 'College Target';
-		$string['ilp_mis_attendance_plugin_simple_punctualitytargetdesc']	= 'College Punctuality Target';
         
         $string['ilp_mis_attendance_plugin_simple_studenttable']			= 'MIS table';
         $string['ilp_mis_attendance_plugin_simple_studenttabledesc']		= 'The table in the MIS where the data for this plugin will be retrieved from';
         
         $string['ilp_mis_attendance_plugin_simple_studentid']				= 'Student ID field';
-        $string['ilp_mis_attendance_plugin_simple_studentiddesc']			= 'The field that will be used to find the student';
+        $string['ilp_mis_attendance_plugin_simple_studentiddesc']				= 'The field that will be used to find the student';
         
         $string['ilp_mis_attendance_plugin_simple_punctuality']				= 'Punctuality';
         $string['ilp_mis_attendance_plugin_simple_punctualitydesc']			= 'The field that holds punctuality data';
@@ -261,13 +223,13 @@ class ilp_mis_attendance_plugin_simple extends ilp_mis_attendance_plugin	{
 
     function getAttendance()
     {
-        return (!empty($this->data)) ? $this->percent_format( $this->data[0][0], true, true, "attendance" ) : 0;
+        return (!empty($this->data)) ? $this->percent_format( $this->data[0][0],true ) : 0;
 
     }
 
     function getPunctuality()
     {
-        return (!empty($this->data)) ? $this->percent_format( $this->data[0][1], true, true, "punctuality" ) : 0;
+        return (!empty($this->data)) ? $this->percent_format( $this->data[0][1],true ) : 0;
     }
 
 

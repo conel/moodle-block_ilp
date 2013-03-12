@@ -140,7 +140,7 @@ class ilp_element_plugin_itemlist_mform extends ilp_element_plugin_mform {
 			$pluginrecord->selecttype 	= 	ILP_OPTIONSINGLE;
 	 			
 	 		//update the plugin with the new data
-	 		//return $this->dbc->update_plugin_record($this->tablename,$pluginrecord);
+	 		return $this->dbc->update_plugin_record($this->tablename,$pluginrecord);
 	 	}
 	 }
 }

@@ -11,6 +11,8 @@
 	require_once('dbconnect.php');
 	require_once('block_lpr_conel_mis_db.php'); // include the connection code for CONEL's MIS db
 	
+	$PAGE->requires->css('/blocks/ilp/styles.css', true);
+	
 	//require_login();
 	
 	include_once($CFG->dirroot. '/blocks/bksb/BksbReporting.class.php');

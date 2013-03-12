@@ -65,7 +65,8 @@ abstract class ilp_mis_attendance_plugin extends ilp_mis_plugin	{
             $colour = $this->passcolour;
         }
         //return html_writer::tag( 'span', $percentage, array( 'style' => "background-color:$colour;display:block" ) );
-        return  "<span style='background-color:$colour;display:block'>$percentage</span>";
+        //return  "<span style='background-color:$colour;display:block'>$percentage</span>";
+		return  "<span style='color:$colour;display:block;text-align:center;font-weight:bold;'>$percentage</span>";
     }
 
     /*

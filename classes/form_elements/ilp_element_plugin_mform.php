@@ -166,6 +166,8 @@ abstract class ilp_element_plugin_mform extends ilp_moodleform {
         	//update the report
 
         	$reportfield	=	$this->dbc->update_report_field($data);
+			//print_object($data);
+			//die();
 	    }
 
         if(!empty($data->id)) {

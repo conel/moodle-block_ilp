@@ -143,7 +143,7 @@ class ilp_element_plugin_itemlist extends ilp_element_plugin{
 				$this->description		=	$reportfield->description;
 				$this->req			=	$reportfield->req;
 				$this->position			=	$reportfield->position;
-			}
+			}		
 		}
 		return false;	
     }	
@@ -286,7 +286,10 @@ class ilp_element_plugin_itemlist extends ilp_element_plugin{
         if( !empty( $this->items_tablename ) ){
     	    //delete all items for the field then delete the field itself by calling the function in the
         	//parent class
+			//RPM - only do this if it's not my custom class as it doesnt have an items table!
+			if ($this->tablename <> 'block_ilp_plu_ddsta') {
     	    $this->dbc->delete_items($this->items_tablename, $pluginrecord->id);
+			}
         }
 
 	//also delete any submitted data - it'll survive in ghostly form in the log table
@@ -333,6 +336,10 @@ class ilp_element_plugin_itemlist extends ilp_element_plugin{
         $table_optiontype->$set_attributes(XMLDB_TYPE_INTEGER, 1, XMLDB_UNSIGNED, null);	//1=single, 2=multi cf blocks/ilp/constants.php
         $table->addField($table_optiontype);
         
+		$table_optiontype = new $this->xmldb_field('emailnotify');
+        $table_optiontype->$set_attributes(XMLDB_TYPE_INTEGER, 1, XMLDB_UNSIGNED, null);	//1=single, 2=multi cf blocks/ilp/constants.php
+        $table->addField($table_optiontype);
+		
         $table_timemodified = new $this->xmldb_field('timemodified');
         $table_timemodified->$set_attributes(XMLDB_TYPE_INTEGER, 10, XMLDB_UNSIGNED, XMLDB_NOTNULL);
         $table->addField($table_timemodified);

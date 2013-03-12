@@ -32,8 +32,12 @@
 								echo $pbar->display_bar($p->percentage,$p->name,$p->total);
 							?>
 					
-					<?php } 
-						  }?>		
+					<?php 	} 
+						  }
+				
+				echo $stuinfo;
+				
+				?>
 	</div>
 	
 	<div id="right-studentinfo">
@@ -52,6 +56,12 @@
 
 <div class="clearfix"> </div>
 
+<?php
+$rpmselectedtab = $PARSER->optional_param('selectedtab', NULL, PARAM_RAW);
+if (is_null($rpmselectedtab) || $rpmselectedtab==2) {
+
+?>
+
 <div id="custom-studentinfo">
 	<table style="width:100%;">
 	<tr><td class="leftcol"><?php echo $ilpstudentprogress; ?></td><td><?php echo $ilptargetgrade; ?></td></tr>
@@ -62,6 +72,11 @@
 	<?php echo $ilptargets; ?>
 	<br />
 </div>
+
+<?php
+}
+
+?>
 
 <?php 
 

@@ -202,8 +202,6 @@ class ilp_dashboard_reports_tab extends ilp_dashboard_tab {
 						if ($report->status == ILP_ENABLED) {
 
 							$icon				=	(!empty($report->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$report->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
-
-							echo $this->get_header($report->name,$icon);
 							
 							//RPM 2013-02-11 need to add in the edit / add buttons if the user has permission
 							//code taken from ilp_dashboard_entries_tab.php to determine permissions and then show the button
@@ -264,8 +262,10 @@ class ilp_dashboard_reports_tab extends ilp_dashboard_tab {
 							</div>
 							<?php			
 														
+							echo "<a name='repanchor'></a>";
 							//RPM end
 							
+							echo $this->get_header($report->name,$icon);
 
 							$stateselector	=	(isset($report_id)) ?	$this->stateselector($report_id) :	"";
 

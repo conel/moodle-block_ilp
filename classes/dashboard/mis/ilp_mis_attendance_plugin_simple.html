@@ -1,5 +1,45 @@
 
 	<?php 
-		$flextable->print_html();
+		//$flextable->print_html();
 	?>
-	<a href="../attendance19/attendance.php?courseid=<?php echo $courseid; ?>&userid=<?php echo $userid; ?>">Detailed Attendance</a>
+	<table class="simple_attendance_overview">
+				<tr>
+					<td style="vertical-align:top;" width="95" class="label" colspan="3"><?php echo get_string('ilp_mis_attendance_plugin_simple_attendance','block_ilp'); ?></td>
+				</tr>
+				<tr>
+					<td width="105">College Target</td>
+					<td>
+						<div class="lpr_progress_bar" title="College Target">
+						<div class="college_target" style="width: 100%;" /></div>
+					</td>
+					<td><div class="percent">100%</div></td>
+				</tr>
+				<tr>
+					<td>You</td>
+					<td>
+						<div class="lpr_progress_bar" title="<?php echo $att;?>">
+						<div class="attendance_avg" style="width: <?php echo $rawatt;?>%;background-color:<?php echo $attcolour ?>;" /></div>
+					</td>
+					<td><div class="percent"><?php echo $att; ?></div></td>
+				</tr>
+				<tr>
+					<td style="vertical-align:top;" class="label" colspan="3"><?php echo get_string('ilp_mis_attendance_plugin_simple_punctuality','block_ilp'); ?></td>
+				</tr>
+				<tr>
+					<td width="105">College Target</td>
+					<td>
+						<div class="lpr_progress_bar" title="College Target">
+						<div class="college_target" style="width: 100%;" /></div>
+					</td>
+					<td><div class="percent">100%</div></td>
+				</tr>
+				<tr>
+					<td>You</td>
+					<td>
+						<div class="lpr_progress_bar" title="<?php echo $punc;?>">
+						<div class="punctuality_avg" style="width: <?php echo $rawpunc;?>%;background-color:<?php echo $punccolour ?>;" /></div>
+					</td>
+					<td><div class="percent"><?php echo $punc; ?></div></td>
+				</tr>
+			</table>
+	<div class="detailed_attendance"><a href="../attendance19/attendance.php?courseid=<?php echo $courseid; ?>&userid=<?php echo $userid; ?>">Click here for detailed attendance</a></div>

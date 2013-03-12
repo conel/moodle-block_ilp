@@ -239,7 +239,7 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			//RPM 2013-02-25 we need to find out if there are any cause for concerns or disciplinaries in our reports
 			//to ensure this report is iterated before the student progress box where a message is displayed we check here first
 			
-			//UPDATE - this section may not be required if it is sufficient to shwo progress bars beneath the students status instead.
+			//UPDATE - this section may not be required if it is sufficient to show progress bars beneath the students status instead.
 			// commented out for now
 			
 			$cfc = "";
@@ -302,6 +302,9 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			
 			*/
 			
+			//RPM 2013-03-11 add in link to the student information page
+			$stuinfo = '<p class="stuinfolink"><a href="http://moodle2/blocks/ilp/studentinfo19/view.php?id='.$student->id.'&courseid='.$_GET['course_id'].'">Student Info</a></p>';
+			
 			
 			//we are going to output the add any reports that have state fields to the percentagebar array 
 			if (!empty($reports) ) {
@@ -343,11 +346,11 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 						
-						echo "<h2 class=\"summary\">{$icon}Latest Tutor Review</h2>";
-						
 						//RPM - new function to draw add / edit button for this report summary if permission exists.
 						$this->addreportbutton($r);
 						//RPM end
+						
+						echo "<h2 class=\"summary\">{$icon}Latest Tutor Review</h2>";
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -478,12 +481,13 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 						$icon =	(!empty($r->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$r->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
-						
-						echo "<h2 class=\"summary\">{$icon}Your Progress</h2>";
-						
+					
 						//RPM - new function to draw add / edit button for this report summary if permission exists.
 						$this->addreportbutton($r);
 						//RPM end
+					
+						echo "<h2 class=\"summary\">{$icon}Your Progress</h2>";
+					
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -613,11 +617,13 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
 
-						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
-						
 						//RPM - new function to draw add / edit button for this report summary if permission exists.
 						$this->addreportbutton($r);
 						//RPM end
+						
+						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
+					
+
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();
@@ -752,12 +758,12 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 						$icon =	(!empty($r->binary_icon)) ? $CFG->wwwroot."/blocks/ilp/iconfile.php?report_id=".$r->id : $CFG->wwwroot."/blocks/ilp/pix/icons/defaultreport.gif";
 					
 						$icon = "<img id='reporticon' class='icon_med' alt='$r->name ".get_string('reports','block_ilp')."' src='$icon' />";
-
-						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
 						
 						//RPM - new function to draw add / edit button for this report summary if permission exists.
 						$this->addreportbutton($r);
 						//RPM end
+						
+						echo "<h2 class=\"summary\">{$icon}{$r->name}</h2>";
 						
 						//create the entries list var that will hold the entry information
 						$entrieslist	=	array();

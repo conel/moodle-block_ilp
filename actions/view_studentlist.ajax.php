@@ -249,7 +249,9 @@ if (!empty($studentslist)) {
 				$reporttext				.=	(!empty($overdueentries))?  "<br />".$overdueentries." ".get_string('reportsoverdue','block_ilp') : "";	
 			}
 
-            $data[$r->id] = $reporttext;
+            //$data[$r->id] = $reporttext;
+			//RPM 2013-03-02 add links to the appropriate page and report
+			$data[$r->id] = "<a target='_blank' href='view_main.php?user_id=".$student->id."&course_id=".$course_id."&selectedtab=6&tabitem=6:".$r->id."#repanchor'>" .$reporttext."</a>";
         }
 
         $lastentry = $dbc->get_lastupdate($student->id);

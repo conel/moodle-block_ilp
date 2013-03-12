@@ -744,7 +744,7 @@ class ilp_db_functions	extends ilp_logging {
      * @return mixed int id of new reocrd or false
      */
     function create_plugin_entry($tablename,$pluginentry)	{
-    	return $this->insert_record($tablename, $pluginentry);
+		return $this->insert_record($tablename, $pluginentry);
     }
 
 
@@ -965,7 +965,51 @@ class ilp_db_functions	extends ilp_logging {
 		return (empty($multiple)) ? $this->dbc->get_record_sql($sql) : $this->dbc->get_records_sql($sql);
 	}
 
+	 /** RPM 04/03/2013
+	 * to work with staff drop down where we dont have an items table
+	 * get the data entry record with the id given
+     *
+     * @param string tablename the name of the table that will be interrogated
+     * @param int 	$entry_id the entry id of the records that will be returned
+     * @param int 	$reportfield_id the id of the report field
+     * @param bool 	$multiple is there a chance multiple records will be return
+     * if yes set mutliple to true
+     * @return mixed object the entry record or false
+     */
+    function get_pluginentry_ddsta($tablename,$entry_id,$reportfield_id,$multiple=false) {
+		global	$CFG;
 
+		$entrytable		=	"{$CFG->prefix}{$tablename}_ent";
+		$parenttable	=	"{$CFG->prefix}{$tablename}";
+
+		//$itemtable		=	(!empty($multiple)) ? "{$CFG->prefix}{$tablename}_items as i," : '';
+		/*
+		Code to get staff from users table
+		select distinct u.id, u.firstname, u.lastname from moodle.mdl_user u 
+			where deleted = 0 and suspended = 0 
+			and firstname <> '' and lastname <> ''
+			and email like '%@conel%'
+			order by firstname asc;
+		*/
+		
+		
+		$itemtable		=	(!empty($multiple)) ? "{$CFG->prefix}user as i," : '';
+		//$where			=	(!empty($multiple)) ? "e.parent_id	=	i.id AND i.parent_id	=	p.id" : "e.parent_id	=	p.id";
+		$where			=	(!empty($multiple)) ? "e.parent_id	=	i.id" : "e.parent_id	=	p.id";
+
+
+		$sql	=	"SELECT		*, concat(i.firstname,' ',i.lastname) value
+					 FROM 		{$parenttable} as p,
+					 			{$itemtable}
+					 			{$entrytable} as e
+					 WHERE 		{$where}
+					 AND		e.entry_id	=	{$entry_id}
+					 AND		p.reportfield_id	=	{$reportfield_id}";
+
+		return (empty($multiple)) ? $this->dbc->get_record_sql($sql) : $this->dbc->get_records_sql($sql);
+	}
+	
+	
     /**
 	 * get the status of the
      *
@@ -1169,6 +1213,44 @@ class ilp_db_functions	extends ilp_logging {
     	return $this->dbc->get_records_sql( $sql );
     }
 
+	
+	
+	
+	/** RPM 04/03/2013
+    * Returns the list of staff for the staff dropdown field plugin
+    *
+    * @return	mixed  object containing the record or bool false
+    */
+	  function get_optionlist_ddsta( $reportfield_id, $tablename, $field=false ){
+		global $CFG;
+		$tablename = $CFG->prefix . $tablename;
+		$item_table = $tablename . "_items";
+		$plugin_table = $tablename;
+
+        $fieldlist = array( "$item_table.id", 'value', 'name' );
+        if( $field ){
+            $fieldlist[] = $field;
+        }
+
+        $whereandlist = array(
+            "$plugin_table.reportfield_id = $reportfield_id"
+        );
+
+			
+		$sql = "SELECT " . implode( ',' , $fieldlist ) . "
+				FROM  	{$CFG->prefix}block_ilp_report_field rptf
+				JOIN 	$plugin_table ON $plugin_table.reportfield_id = rptf.id
+				JOIN 	$item_table ON $item_table.parent_id = 0
+				WHERE 	$plugin_table.reportfield_id = $reportfield_id
+				order by name
+		";
+		
+    	return $this->dbc->get_records_sql( $sql );
+    }
+  		
+	
+	
+	
 
     function get_status_options( $reportfield_id )	{
 
@@ -1714,7 +1796,6 @@ class ilp_db_functions	extends ilp_logging {
             //not an '_items' table - so comes from some other area eg course and has no parent id
    		    $sql    .=  " AND   	parent_id	=	{$parent_id}";
         }
-
    		return 		$this->dbc->get_record_sql($sql);
    }
 
@@ -1796,6 +1877,8 @@ class ilp_db_functions	extends ilp_logging {
   		return ($this->dbc->get_records_sql($sql)) ? true: false;
   	}
 
+	
+	
 
   	/**
     * This function sets the status of a report enabled or disabled
@@ -2246,7 +2329,7 @@ class ilp_db_functions	extends ilp_logging {
   					 WHERE		label		=	"'.$label.'"
   					 AND		report_id	=	'.$report_id
   					 .' '.$currentfieldsql;
-
+					 
   		return $this->dbc->get_records_sql($sql);
   	}
 
