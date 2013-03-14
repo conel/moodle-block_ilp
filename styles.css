@@ -26,7 +26,7 @@
 	border:1px solid #EEDD55;
 }
 .ilp h2{
-	font-size: 2em;
+	font-size: 1.3em;
 	margin: 10px 0;
 } 
 .ilp h2.main {
@@ -70,18 +70,18 @@
 }
 .ilp #left-studentinfo { 
 	float:left; 
-	width:10%; 
-	padding:0 10px; 
+	width:200px; 
+	padding:5px; 
 }
 .ilp #middle-studentinfo { 
 	float:left; 
-	width:30%;
-	padding:0 10px; 
+	width:300px;
+	padding:5px; 
 }
 .ilp #right-studentinfo { 
-	float:right; 
-	width:50%;
-	padding:0 10px;
+	float:left; 
+	width:380px;
+	padding:5px;
 }
 
 .ilp #custom-studentinfo { 
@@ -93,10 +93,12 @@
 .ilp #custom-studentinfo  table td { 
 	padding:0 0 0 10px;
 	margin:0;
+	vertical-align:top;
 }
 
 .ilp #custom-studentinfo  table td.leftcol { 
 	padding:0 10px 0 0;
+	width:50%;
 }
 
 .ilp #studentinfo-container p{ 
@@ -117,7 +119,7 @@
 .ilp .percentagebar {
 	margin:	2px;
 	border:	1px solid #ccc;
-	width:	200px;
+	width:	150px;
 	height:	10px;
 	float:	left;
 	display: 	block;
@@ -186,8 +188,8 @@
 	text-decoration:underline;
 }
 .ilp .entries-container .icon_small img{
-	height:75px;
-	width: 75px;
+	height:50px;
+	width: 50px;
 }
 .ilp #student_list_container {
    overflow: auto;
@@ -400,6 +402,12 @@
 	width:70%; 
 	padding:10px;
 }
+
+.ilp .left-reports-no-right { 
+	float:left; 
+	padding:10px;
+}
+
 .ilp .right-reports { 
 	float:left; 
 	width:20%;
@@ -457,7 +465,7 @@
 .ilp .tabtree {
 	margin-bottom: 3em;
 }
-.tabtree .tabrow0 .tabrow1 { 
+.tabtree .tabrow0 .tabrow1,.tabtree .tabrow0   { 
 	border-bottom: 2px solid #ddd;
 }
 .tabtree .tabrow1 li a, .tabtree .tabrow1 li a:hover, .tabtree .tabrow1 li a span, .tabtree .tabrow1 li a:hover span {
@@ -490,8 +498,8 @@
 	margin-right:10px;	
 }
 .ilp .icon_med {
-	width:50px;
-	height:50px;
+	width:40px;
+	height:40px;
 	margin-right:10px;	
 	display:inline;
 	vertical-align: middle;

@@ -321,6 +321,9 @@ foreach ($stes as $key => $value) {
 	$i++;
 }
 $html .= '</div>';
+/*
+RPM commenting out predicted FS  grades as this needs more work before it is worth including.
+
 $html .= '<div id="predicted_outcome" class="stuinfobox">';
 $html .= '<h4>Predicted Functional Skills grades (TBC)</h4>';
 
@@ -353,11 +356,12 @@ foreach($fsrow as $fsrr) {
 }
 
 $html .= '</tr>';
-*/
+
 $html .= '</tbody>
 </table>';
 			
 $html .= '</div>';
+*/
 
 echo $html;
 

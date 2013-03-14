@@ -126,6 +126,38 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 			//if the third row var is not empty then add the second row
 			if (!empty($tabthirdrow)) $tabs[] = $tabthirdrow;
 			
+			//RPM - add our links to the tabs array
+			
+			$mytab = new stdClass();
+			$mytab->id = 100;
+			$mytab->link = '/blocks/ilp/attendance19/attendance.php?courseid='.$_GET['course_id'].'&userid='.$_GET['user_id'].'';
+			$mytab->text = 'Attendance';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Detailed attendance';
+			
+			array_push($tabs[0],$mytab);
+			
+			$mytab = new stdClass();
+			$mytab->id = 101;
+			$mytab->link = '/blocks/ilp/studentinfo19/view.php?courseid='.$_GET['course_id'].'&id='.$_GET['user_id'].'';
+			$mytab->text = 'Learner Profile';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Learner Profile';
+			
+			array_push($tabs[0],$mytab);
+			
+			//add a summary tab to the beginning as we dont use the entries tab anymore
+			$mytab = new stdClass();
+			$mytab->id = 0;
+			$mytab->link = '/blocks/ilp/actions/view_main.php?courseid='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
+			$mytab->text = 'Summary';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Summary';
+			
+			array_unshift($tabs[0],$mytab);
+			
+			//print_object($tabs);
+			
 			//we need to buffer output to prevent it being sent straight to screen
 			ob_start();
 			
@@ -150,6 +182,163 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 		
 		
 	}
+	
+	
+	
+	
+	
+	
+	/** RPM new method to only display the tabs so this can be included midway through the summary page
+	 * This is easier than trying to move all the other code around to get the tabs midway up the page.
+	 * Returns the 
+	 * @see ilp_dashboard_plugin::display()
+	 */
+	function display_tabsonly()	{	
+		global	$CFG,$OUTPUT,$PARSER;
+
+		//set any variables needed by the display page	
+		
+		//get students full name
+		$student	=	$this->dbc->get_user_by_id($this->student_id);
+		
+		//this variable will hold the content from the selected tab
+		$tabcontent	=	"";
+		
+		if (!empty($student))	{ 
+				
+			$linkurl	=	$CFG->wwwroot."/blocks/ilp/actions/view_main.php?user_id={$this->student_id}&course_id={$this->course_id}";
+			
+			//get the entries tab if this installed it will be set as the default tab
+			$plugin				=	$this->dbc->get_tab_plugin_by_name('ilp_dashboard_entries_tab');
+			
+			//default to entires tab if it is  alvailable if not use id 1 
+			$defaulttab			=	(!empty($plugin)) ?	$plugin->id:	1;
+			
+			//get the selectedtab param if it is in the url
+			$selectedtab	=	$PARSER->optional_param('selectedtab',$defaulttab,PARAM_RAW);
+			
+			//get the actual tab item that was selected
+			$tabitem		=	$PARSER->optional_param('tabitem',$defaulttab.':1',PARAM_RAW);
+			
+			$tabs = array();
+   			$tabrows = array();
+			
+			//set the tab second row var to false
+			$tabsecondrow	=	false;
+				
+			//set the tab third row var to false
+			$tabthirdrow	=	false;
+				
+			//retrieve all dashboard tabs from the db
+			$dashboardtabs		=	$this->dbc->get_dashboard_tabs();
+			
+			//set the $deactivatedtabs var to null
+			$deactivatedtabs		=   null;	
+			
+			foreach	($dashboardtabs	as $dt)	{
+				
+				$classname	=	$dt->name;
+
+				//find out if the tab is enabled
+				$status	=	get_config('block_ilp',$classname.'_pluginstatus');
+				
+				$status	=	(!empty($status)) ? $status	:	0;
+				
+				if ($status	== ILP_ENABLED) {
+	    			//include the dashboard_tab class file
+	    	        include_once("{$CFG->dirroot}/blocks/ilp/classes/dashboard/tabs/{$classname}.php");
+	
+			        if(!class_exists($classname)) {
+			            print_error('pluginclassnotfound', 'block_ilp', '', $classname);
+			        }
+			        
+					$dasttab	=	new $classname($this->student_id,$this->course_id);
+					
+					$tabrows[]	=	new tabobject($dt->id,$linkurl."&selectedtab={$dt->id}&tabitem={$dt->id}",$dasttab->display_name());
+	
+					if ($dasttab->is_selected($selectedtab)) {
+	
+						//this gets the display information from the tab plugin
+						$tabcontent		=	$dasttab->display($tabitem);
+	
+						//returns tabs to be placed on second row
+						$tabsecondrow	=	$dasttab->second_row();
+						
+						//returns tabs to be placed on third row
+						$tabthirdrow	=	$dasttab->third_row();
+						
+						//get the list of tabs that should be deactivated 		
+						$deactivatedtabs		=	$dasttab->deactivated_tabs($tabitem);
+					} 
+				
+				}
+			}
+			
+			$tabs[] = $tabrows;
+			
+			//if the second row var is not empty then add the second row
+			if (!empty($tabsecondrow)) $tabs[] = $tabsecondrow;
+			
+			//if the third row var is not empty then add the second row
+			if (!empty($tabthirdrow)) $tabs[] = $tabthirdrow;
+			
+			//RPM - add our links to the tabs array
+			
+			$mytab = new stdClass();
+			$mytab->id = 100;
+			$mytab->link = '/blocks/ilp/attendance19/attendance.php?courseid='.$_GET['course_id'].'&userid='.$_GET['user_id'].'';
+			$mytab->text = 'Attendance';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Detailed attendance';
+			
+			array_push($tabs[0],$mytab);
+			
+			$mytab = new stdClass();
+			$mytab->id = 101;
+			$mytab->link = '/blocks/ilp/studentinfo19/view.php?courseid='.$_GET['course_id'].'&id='.$_GET['user_id'].'';
+			$mytab->text = 'Learner Profile';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Learner Profile';
+			
+			array_push($tabs[0],$mytab);
+			
+			//add a summary tab to the beginning as we dont use the entries tab anymore
+			$mytab = new stdClass();
+			$mytab->id = 0;
+			$mytab->link = '/blocks/ilp/actions/view_main.php?courseid='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
+			$mytab->text = 'Summary';
+			$mytab->linkedwhenselected = '';
+			$mytab->title = 'Summary';
+			
+			array_unshift($tabs[0],$mytab);
+			
+			//print_object($tabs);
+			
+			//we need to buffer output to prevent it being sent straight to screen
+			ob_start();
+			
+			print_tabs($tabs,$selectedtab,$deactivatedtabs);
+									
+			//pass the output instead to the output var
+			$pluginoutput = ob_get_contents();
+			
+			//add the content if  
+			
+			ob_end_clean();
+			
+			
+			return $pluginoutput; //." ".$tabcontent;
+
+		} else {
+			//the student was not found display and error 
+			print_error('studentnotfound','block_ilp');
+		}
+		
+		
+		
+		
+	}
+	
 	
 	
 	

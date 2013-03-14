@@ -110,6 +110,13 @@ if($mform->is_submitted()) {
 
         if (!isset($formdata->saveanddisplaybutton)) { 
             $return_url = $CFG->wwwroot.'/blocks/ilp/actions/view_main.php?user_id='.$user_id.'&course_id='.$course_id;
+			
+			//RPM - here we want to direct to a better place, can we deduce the url from mform?
+			//print_object($mform);
+			//we have the $report_id, so may be able to load up an object that might hold the tab details to build the return link . . lots of maybes
+			$pluginrecord	=	$dbc->get_report_by_id($mform->report_id);
+			print_object($pluginrecord);
+			
         	redirect($return_url, get_string("reportcreationsuc", 'block_ilp'), ILP_REDIRECT_DELAY);
         }
     }

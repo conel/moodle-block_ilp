@@ -303,7 +303,7 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			*/
 			
 			//RPM 2013-03-11 add in link to the student information page
-			$stuinfo = '<p class="stuinfolink"><a href="http://moodle2/blocks/ilp/studentinfo19/view.php?id='.$student->id.'&courseid='.$_GET['course_id'].'">Student Info</a></p>';
+			//$stuinfo = '<p class="stuinfolink"><a href="http://moodle2/blocks/ilp/studentinfo19/view.php?id='.$student->id.'&courseid='.$_GET['course_id'].'">Student Info</a></p>';
 			
 			
 			//we are going to output the add any reports that have state fields to the percentagebar array 
@@ -769,7 +769,8 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 						$entrieslist	=	array();
 
 						if (!empty($reportentries)) {
-							foreach ($reportentries as $entry)	{
+							//foreach ($reportentries as $entry)	{
+							$entry = array_shift($reportentries);
 							// RPM - need to change to only show the first record : $entry = $reportentries[0]; doesnt work, think it is a datarow
 
 								//TODO: is there a better way of doing this?
@@ -789,7 +790,8 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 								//
 								$entry_data->creator		=	(!empty($creator)) ? fullname($creator)	: get_string('notfound','block_ilp');
 								$entry_data->created		=	userdate($entry->timecreated);
-								$entry_data->modified		=	userdate($entry->timemodified);
+								//$entry_data->modified		=	userdate($entry->timemodified);
+								$entry_data->modified		=	date("d/m/Y",$entry->timemodified);
 								$entry_data->user_id		=	$entry->user_id;
 								$entry_data->entry_id		=	$entry->id;
 
@@ -853,7 +855,7 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 
 								include($CFG->dirroot.'/blocks/ilp/classes/dashboard/plugins/ilp_dashboard_target_grades.html');
 
-							}
+							//} //no longer foreach, just first entry
 						} else {
 
 							echo get_string('nothingtodisplay');
@@ -870,6 +872,12 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 			
 			//instantiate the percentage bar class in case there are any percentage bars
 			$pbar	=	new ilp_percentage_bar();
+			
+			
+			//RPM we want to display the tabs in the middle of the custom content ^^
+			$tabobj = new ilp_dashboard_main_plugin($_GET['user_id'], $_GET['course_id']);
+			
+			$tabstr = $tabobj->display_tabsonly();
 			
 			
 			//we need to buffer output to prevent it being sent straight to screen
@@ -947,6 +955,8 @@ class ilp_dashboard_student_info_plugin extends ilp_dashboard_plugin {
 								$detail->lastmod	=	(!empty($lastupdate->timemodified)) ?  userdate($lastupdate->timemodified , get_string('strftimedate', 'langconfig')) : get_string('notapplicable','block_ilp');
 								$detail->canadd	    = ($canaddreport) ? true : false;
 								$detail->canedit	= ($caneditreport) ? true : false;
+								
+								$this->course_id = $_GET['course_id'];
 
 							}
 							

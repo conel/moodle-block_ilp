@@ -4,11 +4,8 @@
 	<div id="studentinfo-container">
 	
 	<div id="left-studentinfo">		
-			<?php echo $studentpicture; ?>
-	</div>
-		
-	<div id="middle-studentinfo">
-				<?php  if (!empty($tutorslist)) {?>
+			<?php echo $studentpicture; ?><br /><br />
+			<?php  if (!empty($tutorslist)) {?>
 				<p>
 				<strong><?php echo get_string('mytutor','block_ilp');?></strong><span><?php echo implode(', ',$tutorslist); ?></span>
 				</p>
@@ -39,9 +36,9 @@
 				
 				?>
 	</div>
-	
-	<div id="right-studentinfo">
-     <?php 
+		
+	<div id="middle-studentinfo">
+			<?php 
 		if (!empty($misoverviewplugins)) {
 			foreach ($misoverviewplugins as $mp)	{
 				$mp->set_data($student->idnumber);
@@ -49,7 +46,13 @@
 			}
 		}
 
-		?>
+		?>	
+	</div>
+	
+	<div id="right-studentinfo">
+     
+		<?php echo $ilpstudentprogress; ?>
+		<?php echo $ilptargetgrade; ?>
     </div>
 	
 	</div>
@@ -63,10 +66,7 @@ if (is_null($rpmselectedtab) || $rpmselectedtab==2) {
 ?>
 
 <div id="custom-studentinfo">
-	<table style="width:100%;">
-	<tr><td class="leftcol"><?php echo $ilpstudentprogress; ?></td><td><?php echo $ilptargetgrade; ?></td></tr>
-	</table>
-	<br />
+	<?php echo $tabstr; ?>
 	<?php echo $ilptutorreview; ?>
 	<br />
 	<?php echo $ilptargets; ?>

@@ -1,7 +1,7 @@
 <div class="clearfix"> </div>
 	<?php //RPM - 2012-02-16 This is a copy of ilp_dashboard_reports_tab.html to allow for latest student progress review to be displayed differently. ?>
 		<div class="reports-container">
-					<div class="left-reports">
+					<div class="left-reports-no-right">
 					<p>Student last login: <?php echo $lastlogin; ?></p><br />
 					<?php foreach ($reportfields as $field) 	{
 							if (!in_array($field->id,$dontdisplay)) {
