@@ -189,7 +189,7 @@ if (!empty($studentslist)) {
         //thus there status is the default
         $data['u_status'] = (!empty($student->u_status)) ? $student->u_status : $status_item;
 
-        $data['view'] = "<a href='{$CFG->wwwroot}/blocks/ilp/actions/view_main.php?user_id={$student->id}{$course_param}' >" . get_string('viewplp', 'block_ilp') . "</a>";
+        $data['view'] = "<a name=".$student->id."_anchor href='{$CFG->wwwroot}/blocks/ilp/actions/view_main.php?user_id={$student->id}{$course_param}' >" . get_string('viewplp', 'block_ilp') . "</a>";
 
 		//we will only attempt to get MIS data if an attendace plugin has been selected in the settings page
 		
@@ -251,7 +251,9 @@ if (!empty($studentslist)) {
 
             //$data[$r->id] = $reporttext;
 			//RPM 2013-03-02 add links to the appropriate page and report
-			$data[$r->id] = "<a target='_blank' href='view_main.php?user_id=".$student->id."&course_id=".$course_id."&selectedtab=6&tabitem=6:".$r->id."#repanchor'>" .$reporttext."</a>";
+			$link = "<a target='_blank' href='view_main.php?user_id=".$student->id."&course_id=".$course_id."&selectedtab=6&tabitem=6:".$r->id."#repanchor'>" .$reporttext."</a>";
+			$link .= "<br /><a href='edit_reportentry.php?user_id=".$student->id."&course_id=".$course_id."&report_id=".$r->id."&redir=1'> + Quick Add</a>";
+			$data[$r->id] = $link;
         }
 
         $lastentry = $dbc->get_lastupdate($student->id);

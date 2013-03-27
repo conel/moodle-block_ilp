@@ -130,7 +130,7 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 			
 			$mytab = new stdClass();
 			$mytab->id = 100;
-			$mytab->link = '/blocks/ilp/attendance19/attendance.php?courseid='.$_GET['course_id'].'&userid='.$_GET['user_id'].'';
+			$mytab->link = '/blocks/ilp/attendance19/attendance.php?course_id='.$_GET['course_id'].'&userid='.$_GET['user_id'].'';
 			$mytab->text = 'Attendance';
 			$mytab->linkedwhenselected = '';
 			$mytab->title = 'Detailed attendance';
@@ -139,7 +139,7 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 			
 			$mytab = new stdClass();
 			$mytab->id = 101;
-			$mytab->link = '/blocks/ilp/studentinfo19/view.php?courseid='.$_GET['course_id'].'&id='.$_GET['user_id'].'';
+			$mytab->link = '/blocks/ilp/studentinfo19/view.php?course_id='.$_GET['course_id'].'&id='.$_GET['user_id'].'';
 			$mytab->text = 'Learner Profile';
 			$mytab->linkedwhenselected = '';
 			$mytab->title = 'Learner Profile';
@@ -149,7 +149,7 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 			//add a summary tab to the beginning as we dont use the entries tab anymore
 			$mytab = new stdClass();
 			$mytab->id = 0;
-			$mytab->link = '/blocks/ilp/actions/view_main.php?courseid='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
+			$mytab->link = '/blocks/ilp/actions/view_main.php?course_id='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
 			$mytab->text = 'Summary';
 			$mytab->linkedwhenselected = '';
 			$mytab->title = 'Summary';
@@ -305,7 +305,7 @@ class ilp_dashboard_main_plugin extends ilp_dashboard_plugin {
 			//add a summary tab to the beginning as we dont use the entries tab anymore
 			$mytab = new stdClass();
 			$mytab->id = 0;
-			$mytab->link = '/blocks/ilp/actions/view_main.php?courseid='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
+			$mytab->link = '/blocks/ilp/actions/view_main.php?course_id='.$_GET['course_id'].'&user_id='.$_GET['user_id'].'';
 			$mytab->text = 'Summary';
 			$mytab->linkedwhenselected = '';
 			$mytab->title = 'Summary';

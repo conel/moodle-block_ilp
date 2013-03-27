@@ -41,7 +41,15 @@ class report_entry_mform extends ilp_moodleform {
 
 
 			// call the parent constructor
-       	 	parent::__construct("{$CFG->wwwroot}/blocks/ilp/actions/edit_reportentry.php");
+			//RPM add in feature to handle redirect to group overview if present
+			//$link = "{$CFG->wwwroot}/blocks/ilp/actions/edit_reportentry.php";
+			$link = "{$CFG->wwwroot}/blocks/ilp/actions/edit_reportentry.php";
+			
+			if ($_GET['redir']==1) {
+			$link .="?redir=1";
+			}
+			
+       	 	parent::__construct($link);
 		}
 
 

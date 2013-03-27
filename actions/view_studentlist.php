@@ -53,9 +53,14 @@ if (empty($access_viewotherilp)  && !empty($course_id))	{
 
 if (!empty($course_id)) {
 	$listurl	=	"{$CFG->wwwroot}/blocks/ilp/actions/view_studentlist.php?tutor=0&course_id={$course_id}";
+	$courseurl = "{$CFG->wwwroot}/course/view.php?id={$course_id}";
+	$course = $dbc->get_course_by_id($course_id);
+	$PAGE->navbar->add($course->shortname,$courseurl,'title');
 } else {
 	$listurl	=	"{$CFG->wwwroot}/blocks/ilp/actions/view_studentlist.php?tutor=1&course_id=0";
 }
+
+
 
 //add the page title
 $PAGE->navbar->add(get_string('ilps','block_ilp'),$listurl,'title');
@@ -68,8 +73,8 @@ if (!empty($course_id)) {
 	$title		=	get_string('mytutees','block_ilp');
 }
 
-//block name
-$PAGE->navbar->add($title,null,'title');
+//block name - RPM taken out as we include the course in the nav if available, I dont think the my tutees bit ever worked
+//$PAGE->navbar->add($title,null,'title');
 
 
 // setup the page title and heading

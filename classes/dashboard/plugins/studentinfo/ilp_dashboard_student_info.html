@@ -3,57 +3,57 @@
 	<h1><?php echo $studentname; ?></h1>
 	<div id="studentinfo-container">
 	
-	<div id="left-studentinfo">		
-			<?php echo $studentpicture; ?><br /><br />
-			<?php  if (!empty($tutorslist)) {?>
-				<p>
-				<strong><?php echo get_string('mytutor','block_ilp');?></strong><span><?php echo implode(', ',$tutorslist); ?></span>
-				</p>
-				<?php } ?>
-				<p>
-					<strong><?php echo get_string('studentstatus','block_ilp');?></strong>
-					
-					<?php  if (empty($can_editstatus)) { ?>
-						<span id="user_status"  style="color: <?php echo $userstatuscolor; ?>" ><?php echo $statusitem->name; ?></span>
-					<?php } else {?>
-						<span id="user_status" class="hidden" style="color: <?php echo $userstatuscolor; ?>"><?php echo $statusitem->name; ?></span><img src="<?php echo $OUTPUT->pix_url("/i/edit");?>" alt="<?php echo get_string('edit');?>" class="hidden editicon" id="edit_userstatus_icon" />
-						<?php echo $this->userstatus_select($statusitem->id); ?>
+		<div id="left-studentinfo">		
+				<?php echo $studentpicture; ?><br /><br />
+				<?php  if (!empty($tutorslist)) {?>
+					<p>
+					<strong><?php echo get_string('mytutor','block_ilp');?></strong><span><?php echo implode(', ',$tutorslist); ?></span>
+					</p>
 					<?php } ?>
-				</p>
-					
-				<?php
-		
-				 if (!empty($percentagebars)) {  
-							foreach($percentagebars	as $p) {
+					<p>
+						<strong><?php echo get_string('studentstatus','block_ilp');?></strong>
+						
+						<?php  if (empty($can_editstatus)) { ?>
+							<span id="user_status"  style="color: <?php echo $userstatuscolor; ?>" ><?php echo $statusitem->name; ?></span>
+						<?php } else {?>
+							<span id="user_status" class="hidden" style="color: <?php echo $userstatuscolor; ?>"><?php echo $statusitem->name; ?></span><img src="<?php echo $OUTPUT->pix_url("/i/edit");?>" alt="<?php echo get_string('edit');?>" class="hidden editicon" id="edit_userstatus_icon" />
+							<?php echo $this->userstatus_select($statusitem->id); ?>
+						<?php } ?>
+					</p>
+						
+					<?php
+			
+					 if (!empty($percentagebars)) {  
+								foreach($percentagebars	as $p) {
 
-								echo $pbar->display_bar($p->percentage,$p->name,$p->total);
-							?>
+									echo $pbar->display_bar($p->percentage,$p->name,$p->total);
+								?>
+						
+						<?php 	} 
+							  }
 					
-					<?php 	} 
-						  }
-				
-				echo $stuinfo;
-				
-				?>
-	</div>
-		
-	<div id="middle-studentinfo">
-			<?php 
-		if (!empty($misoverviewplugins)) {
-			foreach ($misoverviewplugins as $mp)	{
-				$mp->set_data($student->idnumber);
-				echo $mp->display();
+					echo $warningmessage;
+					
+					?>
+		</div>
+			
+		<div id="middle-studentinfo">
+				<?php 
+			if (!empty($misoverviewplugins)) {
+				foreach ($misoverviewplugins as $mp)	{
+					$mp->set_data($student->idnumber);
+					echo $mp->display();
+				}
 			}
-		}
 
-		?>	
-	</div>
-	
-	<div id="right-studentinfo">
-     
-		<?php echo $ilpstudentprogress; ?>
-		<?php echo $ilptargetgrade; ?>
-    </div>
+			?>	
+		</div>
+		
+		<div id="right-studentinfo">
+		 
+			<?php echo $ilpstudentprogress; ?>
+			<?php echo $ilptargetgrade; ?>
+		</div>
 	
 	</div>
 
@@ -67,6 +67,10 @@ if (is_null($rpmselectedtab) || $rpmselectedtab==2) {
 
 <div id="custom-studentinfo">
 	<?php echo $tabstr; ?>
+	<div class="assmgr">
+		<?php echo $ilpAssmgr; ?>
+	</div>
+	<div class="clearfix"> </div>
 	<?php echo $ilptutorreview; ?>
 	<br />
 	<?php echo $ilptargets; ?>

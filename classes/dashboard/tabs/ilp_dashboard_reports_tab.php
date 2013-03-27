@@ -384,13 +384,31 @@ class ilp_dashboard_reports_tab extends ilp_dashboard_tab {
 									//get comments for this entry
 									$comments				=	$this->dbc->get_entry_comments($entry->id);
 
-									//
+									
 									$entry_data->creator		=	(!empty($creator)) ? fullname($creator)	: get_string('notfound','block_ilp');
 									$entry_data->created		=	userdate($entry->timecreated);
 									$entry_data->modified		=	userdate($entry->timemodified);
 									$entry_data->user_id		=	$entry->user_id;
 									$entry_data->entry_id		=	$entry->id;
 
+									//RPM - need to assign edit permission based on some criteria here
+									//if it is their entry then they can edit, otherwise they need to have the viewothersilp capability (teacher)
+									
+									$access_report_viewilp = false;
+									$capability = $this->dbc->get_capability_by_name('block/ilp:viewotherilp');
+									if (!empty($capability))	$access_report_viewilp	=	$this->dbc->has_report_permission($report_id,$role_ids,$capability->id);
+									
+									if ($access_report_editreports and $entry_data->creator == ($USER->firstname . ' '.$USER->lastname )) {
+										//$access_report_editreports stays at 1, is their own and they have permission
+									}
+									elseif ($access_report_editreports and $access_report_viewilp) {
+										//$access_report_editreports stays at 1, is anothers and they are a teacher
+									}
+									else {
+										//no edit permission
+										$access_report_editreports = 0;
+									}
+									
 									if ($has_courserelated) {
 										$coursename	=	false;
 										$crfield	=	$this->dbc->get_report_coursefield($entry->id,$courserelatedfield_id);

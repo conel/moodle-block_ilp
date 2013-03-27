@@ -60,6 +60,7 @@
 	display:block; 
 	margin: 0 0 20px 0;
 	position:relative;
+	width:1000px;
 }
 .ilp #studentinfo-container:after {
     content:".";
@@ -179,7 +180,8 @@
 	margin: 3px 0;
 }
 .ilp  #right-entries .add a{ 
-	background: #333; 
+	/* background: #333; */
+	background: #f29b31;
 	color: #fff; 
 	padding: 5px; 
 	text-decoration:none;
@@ -423,7 +425,8 @@
 	margin: 3px 10px;
 }
 .ilp .view-comments{
-	background: #333333; 
+	/*background: #333333; */
+	background: #0386bd;
 	color: #ffffff; 
 	padding: 5px 10px; 
 	margin: 0 0 10px 0;
@@ -518,3 +521,120 @@ div.stuinfobox
 	border: 2px solid #d2d2d2 !important;
 	margin-bottom:10px;
 	}
+	
+.ilp p.warningmsg {
+color:red;
+}
+
+/* assessment manager overrides */
+
+.ilp .assmgr {
+}
+
+.ilp .assmgr .asmprog{
+width:45%;
+float:left;
+padding:5px 5px 5px 20px;
+}
+
+.ilp .assmgr .asmprog a{
+font-size:0.9em;
+}
+
+.ilp .assmgr .progress_bar_small {
+margin-bottom:5px;
+width:200px;
+}
+
+
+/* mystudent home page overrides */
+
+.ilp_mystudent .ilp #studentinfo-container { 
+	text-align:center;
+	/*border: 1px dotted red;*/
+}
+
+.ilp_mystudent .ilp #left-studentinfo { 
+	float:left; 
+	width:200px; 
+	padding:5px; 
+	text-align:left;
+	/*border: 1px dotted green;*/
+}
+.ilp_mystudent .ilp #middle-studentinfo { 
+	float:left; 
+	width:300px;
+	padding:5px; 
+	text-align:left;
+	/*border: 1px dotted green;*/
+}
+
+/** ILP progress bars for attendance **/
+
+.lpr_progress_bar {
+    width           : 120px;
+    height          : 15px;
+    border          : 1px solid #000000;
+    background-color: #FFFFFF;
+	text-align		: left !important;
+	background-image: url('/blocks/ilp/pix/progress_bg.png');
+}
+
+.lpr_progress_bar .college_target {
+    background-color: #4D89F9;
+    border          : 0 none;
+    height          : 14px;
+	background-image: url('/blocks/ilp/pix/progress_fg_college.png');
+}
+
+
+.lpr_progress_bar .progress_avg {
+    border          : 0 none;
+    height          : 15px;
+	background-color: #000000;
+}
+
+.lpr_progress_bar .attendance_avg {
+    /*background-color: #80C65A;*/
+    border          : 0 none;
+    height          : 14px;
+	/*background-image: url('/blocks/ilp/pix/progress_fg.png');*/
+}
+
+.lpr_progress_bar .punctuality_avg {
+    /*background-color: #80C65A;*/
+    border          : 0 none;
+    height          : 14px;
+	background-image: url('/blocks/ilp/pix/progress_fg.png');
+}
+
+.simple_attendance_overview {
+width:290px;
+}
+
+.simple_attendance_overview .label {
+	font-weight:bold;
+	font-size:1.2em;
+	}
+	
+	
+.detailed_attendance {
+margin-top:20px;
+}
+
+.detailed_attendance  a{
+border:3px solid red;
+padding:7px;
+display:block;
+width:380px;
+font-weight:bold;
+text-align:center;
+font-size:1.3em;
+}
+
+.detailed_attendance  a:hover{
+background-color:red;
+color:white;
+border:3px solid tomato;
+}
+

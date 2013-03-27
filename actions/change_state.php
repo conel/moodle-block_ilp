@@ -83,8 +83,8 @@ if ($stateplugin) {
 		$resulttext		=	get_string('statechanged','block_ilp');
 	}
 } 
-
-
+//RPM - not quite as easy here to direct to the correct place!
+//print_object($entry);
 $return_url = $CFG->wwwroot."/blocks/ilp/actions/view_main.php?user_id={$user_id}&course_id={$course_id}&selectedtab={$selectedtab}&tabitem={$tabitem}";
 redirect($return_url, $resulttext, ILP_REDIRECT_DELAY);
 
