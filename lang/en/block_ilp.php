@@ -321,6 +321,13 @@
 
     //MESSAGE PROVIDER
     $string['messageprovider:ilp_comment']      = 'New report comment';
+	
+	
+	//ILP Statistics tool
+	$string[ 'ilp_stats_nav' ]		=	"ILP Statistics";
+	
+	
+	
 
 	global $CFG;
 
