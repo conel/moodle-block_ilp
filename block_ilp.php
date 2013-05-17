@@ -519,15 +519,34 @@ class block_ilp extends block_list {
 	
 	function cron() {
 		global $CFG;
+		
+		//RPM ILP stats - recalculate if the last calc date is more than 24 hours ago
+		require_once($CFG->dirroot."/blocks/ilp/stats/ilp_stats_db.php");
+		$rpm_db = new ilp_stats_db();
+		$result = $rpm_db->get_last_update();
+		
+		
+		
+		//if last ran more than 24 hours ago then run again!
+		if ((time() - strtotime($result->max_updated))/3600 > 24) {
+			$result = $rpm_db->update_stats();
+			mtrace('ILP Stats CRON ran, updated records for '.$result->numcourses.' courses');
+		}
+		else {
+		mtrace('ILP Stats ran less than 24 hours ago - skipping');
+		}
+
+		//original cron code follows
 
 		require_once($CFG->dirroot."/blocks/ilp/classes/ilp_cron.class.php");
 
-		
 		$cron	=	 new ilp_cron();
 		
-		mtrace('yep');
+		mtrace('Original ILP block CRON triggered');
 		
 		$cron->run();
+	
+		
 	}
 	
     

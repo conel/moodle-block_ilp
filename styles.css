@@ -638,3 +638,9 @@ color:white;
 border:3px solid tomato;
 }
 
+
+/* ILP Stats tool  */
+
+div#ilp_stats_accordian h3{
+cursor: pointer !important;
+}
