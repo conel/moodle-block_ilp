@@ -530,7 +530,8 @@ class block_ilp extends block_list {
 		//if last ran more than 24 hours ago then run again!
 		if ((time() - strtotime($result->max_updated))/3600 > 24) {
 			$result = $rpm_db->update_stats();
-			mtrace('ILP Stats CRON ran, updated records for '.$result->numcourses.' courses');
+			mtrace('ILP Stats CRON ran, updated records for '.$result->numcategories.' categories');
+			//mtrace('ILP Stats CRON disabled until coding complete');
 		}
 		else {
 		mtrace('ILP Stats ran less than 24 hours ago - skipping');

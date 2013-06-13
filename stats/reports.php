@@ -93,43 +93,93 @@ echo '</select></form>';
 // print the page heading
 print_heading($heading);
 
+//if we are not at the top of the tree then a quick link to take us up a level would be good:
+
+if ($category->id != 0) {
+echo "<p class=\"up\"><a href=\"?category_id=" . $category->parent . "\">Go up a level</a></p>";
+}
+
 // load up the stats for this category! The amazing SQL stored procedure does everything so we just need to display stuff!
 // put it all in an accordian so it can be expanded collapsed etc
-
-
 
 echo "<div id=\"ilp_stats_accordian\">";
 
 $results = $ilp_db->get_category_stats($category_id,1);
-$row = array_shift($results);
+$courseresults = $ilp_db->get_course_stats($category_id,1);
+if (!empty($results)) {
+	$row = array_shift(array_values($results));
+	}
+else {
+	$row = array_shift(array_values($courseresults));
+	}
 $curr = "";
-
-if ($row->term_start_date < time() and $row->term_end_date > time()) 
+if (!empty($row) and $row->term_start_date < time() and $row->term_end_date > time()) 
 	{ $curr = " class=\"curr\" ";}
 
 echo "<h3".$curr.">Term 1</h3>";
-draw_table($results);
-
+Echo "<div class=\"ilp_stats\">";
+if (!empty($results)) {
+	echo "<h4>Category stats</h4>";
+	draw_table($results);
+	echo "<p class=\"csv\"><a href=\"export.php?termnum=1\">Export all category stats for term 1 to CSV</a></p>";
+	}
+if (!empty($courseresults)) {
+	echo "<h4>Course stats</h4>";
+	draw_table($courseresults);
+	}
+Echo "</div>";
 
 $results = $ilp_db->get_category_stats($category_id,2);
-$row = array_shift($results);
+$courseresults = $ilp_db->get_course_stats($category_id,2);
+if (!empty($results)) {
+	$row = array_shift(array_values($results));
+	}
+else {
+	$row = array_shift(array_values($courseresults));
+	}
 $curr = "";
 
-if ($row->term_start_date < time() and $row->term_end_date > time()) 
+if (!empty($row) and $row->term_start_date < time() and $row->term_end_date > time()) 
 { $curr = " class=\"curr\" ";}
 
 echo "<h3".$curr.">Term 2</h3>";
-draw_table($results);
+Echo "<div class=\"ilp_stats\">";
+if (!empty($results)) {
+	echo "<h4>Category stats</h4>";
+	draw_table($results);
+	echo "<p class=\"csv\"><a href=\"export.php?termnum=2\">Export all category stats for term 2 to CSV</a></p>";
+	}
+if (!empty($courseresults)) {
+	echo "<h4>Course stats</h4>";
+	draw_table($courseresults);
+	}
+Echo "</div>";
 
 $results = $ilp_db->get_category_stats($category_id,3);
-$row = array_shift($results);
+$courseresults = $ilp_db->get_course_stats($category_id,3);
+if (!empty($results)) {
+	$row = array_shift(array_values($results));
+	}
+else {
+	$row = array_shift(array_values($courseresults));
+	}
 $curr = "";
 
-if ($row->t.term_start_date < time() and $row->term_end_date > time()) 
+if (!empty($row) and $row->term_start_date < time() and $row->term_end_date > time()) 
 { $curr = " class=\"curr\" ";}
 
 echo "<h3".$curr.">Term 3</h3>";
-draw_table($results);
+Echo "<div class=\"ilp_stats\">";
+if (!empty($results)) {
+	echo "<h4>Category stats</h4>";
+	draw_table($results);
+	echo "<p class=\"csv\"><a href=\"export.php?termnum=3\">Export all category stats for term 3 to CSV</a></p>";
+	}
+if (!empty($courseresults)) {
+	echo "<h4>Course stats</h4>";
+	draw_table($courseresults);
+	}
+Echo "</div>";
 
 echo "</div>";
 
@@ -142,20 +192,48 @@ print_footer();
 echo "<script src=\"stats.js\"></script>";
 
 function draw_table($results) {
-
+	//updated to include totals . . 
+	
+	$students = 0;
+	$green = 0;
+	$amber = 0;
+	$red = 0;
+	$targets = 0;
+	$targets_outstanding = 0;
+	$tutor_review = 0;
+	$good_performance = 0;
+	$cause_for_concern = 0;
+	$student_progress = 0;
+	$disciplinary = 0;
+	$target_grade = 0;
+	
 	if (!empty($results)) {
 
-		Echo "<div class=\"ilp_stats\"><table><tr><th>Name</th><th>Students</th><th>Green</th><th>Amber</th><th>Red</th><th>Targets</th><th>Overdue Targets</th><th>Tutor Review</th><th>Good Performance</th><th>Cause for concern</th><th>Student progress</th><th>Disciplinary</th><th>Target grade</th></tr>";
+		Echo "<table><tr><th>Name</th><th>Students</th><th>Green</th><th>Amber</th><th>Red</th><th>Targets</th><th>Overdue Targets</th><th>Tutor Review</th><th>Good Performance</th><th>Cause for concern</th><th>Student progress</th><th>Disciplinary</th><th>Target grade</th></tr>";
 
 		foreach ($results as $r) {
 		
-		$url = ($r->coursecount == 0 ? "?category_id=".$r->id : "/course/category.php?id=".$r->id);
+		$url = ($r->is_course == 0 ? "?category_id=".$r->id : "/blocks/ilp/actions/view_studentlist.php?tutor=0&course_id=".$r->id);
+		
 		
 		echo "<tr><td><a href=\"".$url."\">".$r->name."</a></td><td>".$r->students."</td><td>".$r->green_status."</td><td>".$r->amber_status."</td><td>".$r->red_status."</td><td>".$r->target."</td><td>".$r->target_outstanding."</td><td>".$r->tutor_review."</td><td>".$r->good_perf_record."</td><td>".$r->cause_for_concern."</td><td>".$r->student_progress."</td><td>".$r->disciplinary."</td><td>".$r->target_grade."</td></tr>";
 
+		$students = $students + $r->students;
+		$green = $green + $r->green_status;
+		$amber = $amber + $r->amber_status;
+		$red = $red + $r->red_status;
+		$targets = $targets + $r->target;
+		$targets_outstanding = $targets_outstanding + $r->target_outstanding;
+		$tutor_review = $tutor_review + $r->tutor_review;
+		$good_performance = $good_performance + $r->good_perf_record;
+		$cause_for_concern = $cause_for_concern + $r->cause_for_concern;
+		$student_progress = $student_progress + $r->student_progress;
+		$disciplinary = $disciplinary + $r->disciplinary;
+		$target_grade = $target_grade + $r->target_grade;
+		
 		}
-
-		echo "</table></div>";
+		echo "<tr class=\"totalrow\"><td>Totals</td><td>".$students."</td><td>".$green."</td><td>".$amber."</td><td>".$red."</td><td>".$targets."</td><td>".$targets_outstanding."</td><td>".$tutor_review."</td><td>".$good_performance."</td><td>".$cause_for_concern."</td><td>".$student_progress."</td><td>".$disciplinary."</td><td>".$target_grade."</td></tr>";
+		echo "</table>";
 	}
 }
 
@@ -180,10 +258,8 @@ global $CFG, $USER, $OUTPUT;
             $indent .= '&nbsp;&nbsp;&nbsp;';
         }
 
-		if ($category->coursecount == 0) {
         echo '<option '.$selected.' value="'.$category->id.'" >'.$indent.
              format_string($category->name, true, array('context' => $category->context)).'</option>';
-			 }
 
     } else {
         $category = new stdClass();

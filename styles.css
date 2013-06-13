@@ -643,4 +643,16 @@ border:3px solid tomato;
 
 div#ilp_stats_accordian h3{
 cursor: pointer !important;
+padding:10px 10px 10px 0;
+border-bottom:1px solid grey;
+}
+
+#ilp_stats_accordian th{
+text-align:left;
+border-bottom:1px dotted grey;
+}
+
+#ilp_stats_accordian .totalrow td{
+font-weight:bold;
+border-top:1px dotted grey;
 }

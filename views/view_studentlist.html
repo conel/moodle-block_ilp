@@ -47,7 +47,7 @@ $PAGE->requires->js_init_call('M.ilp_view_studentlist.init', null, true, $jsmodu
 ?>
 
 <div class="ilp">
-<h2><?php echo get_string('students','block_ilp').": ".$pagetitle;?></h2>
+<h2><?php echo get_string('students','block_ilp').": ".$pagetitle;?> - <a href="../stats/reports.php?category_id=<?php echo $course->category; ?>">View ILP statistics</a></h2>
 
 	<form method="get" action='<?php echo $CFG->wwwroot."/blocks/ilp/actions/view_studentlist.php?tutor=false";?>' id='filter_form' >
 	<?php 
